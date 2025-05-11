@@ -24,12 +24,4 @@ ROS2와 AI를 활용한 자율주행 로봇개발자 부트캠프 3팀 저장소
 
 아래 명령어로 Python 패키지 의존성을 한 번에 설치할 수 있습니다.
 
-git test 1
 
-jj git test2
-
-hj git test3
-
-juaiswell test4
-
-surin git test
