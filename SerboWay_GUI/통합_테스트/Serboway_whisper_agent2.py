@@ -22,9 +22,13 @@ import os
 from dotenv import load_dotenv
 import torch
 
-from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
 import torch
 import soundfile as sf
+
+# 통신 모듈 추가
+import websockets
+
+import json
 
 
 load_dotenv()
@@ -74,14 +78,32 @@ class OrderState:
         self.confirmed = False
 
     def get_dict(self):
+        menu_data = MENU_DATA.get(self.menu, {})
+        veg_data = VEGETABLE_DATA.get(self.vegetable, {})
+        cheese_data = CHEESE_DATA.get(self.cheese, {})
+
         return {
-            "menu": self.menu,
-            "sauce": self.sauce,
-            "vegetable": self.vegetable,
-            "cheese": self.cheese,
+            "menu": {
+                "name": self.menu,
+                "price": menu_data.get("price", 0),
+                "qty": 1  # 음성 주문은 수량 1로 가정
+            } if self.menu else None,
+            "sauce": {
+                "name": self.sauce,
+                "price": 0  # 소스는 가격 없음
+            } if self.sauce else None,
+            "vegetables": {
+                "name": self.vegetable,
+                "price": veg_data.get("price", 0)
+            } if self.vegetable else None,
+            "cheese": {
+                "name": self.cheese,
+                "price": cheese_data.get("price", 0)
+            } if self.cheese else None,
             "step": self.step,
             "confirmed": self.confirmed,
         }
+
 
     def reset(self):
         self.__init__()
@@ -198,7 +220,10 @@ def confirm_order(confirm: bool) -> str:
     order_state = st.session_state.order_state
     if confirm:
         order_state.confirmed = True
-        return f"✅ 주문이 완료되었습니다!\n{get_order_summary('')}"  # 빈 문자열 전달
+        # 딕셔너리 구조로 저장
+        with open("order_data.json", "W", encoding="utf-8") as f:
+            json.dump(order_state.get_dict(), f, ensure_ascii=False)
+            return f"주문이 완료되었습니다.\n{get_order_summary('')}"
     else:
         order_state.reset()
         return "🔄 주문을 처음부터 다시 시작합니다."
@@ -209,34 +234,57 @@ if "whisper_model" not in st.session_state:
 
 @tool
 def speech_to_text(tool_input: str = "") -> str:
-    """음성을 인식하고 텍스트로 변환합니다. (Wav2Vec2 한국어 모델 사용)"""
+    """음성을 텍스트로 변환합니다."""
     try:
         st.info("말씀해주세요", icon="🎤")
         sd.default.samplerate = 16000
         sd.default.channels = 1
         recording = sd.rec(int(3 * 16000))
         sd.wait()
-        wav_path = "temp.wav"
+        wav_path = "temp_whisper.wav"
         sf.write(wav_path, recording, 16000)
-
-        # 모델과 토크나이저 로드 (최초 실행시 다운로드, 이후 캐시)
-        tokenizer = Wav2Vec2Tokenizer.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-korean")
-        model = Wav2Vec2ForCTC.from_pretrained("jonatasgrosman/wav2vec2-large-xlsr-53-korean")
-
-        # 음성 파일 로드 및 전처리
-        audio_input, sample_rate = sf.read(wav_path)
-        if len(audio_input.shape) > 1:  # 스테레오 → 모노
-            audio_input = audio_input.mean(axis=1)
-        # 16kHz로 리샘플링 필요시 추가
-
-        input_values = tokenizer(audio_input, return_tensors="pt", padding="longest").input_values
-        with torch.no_grad():
-            logits = model(input_values).logits
-        predicted_ids = torch.argmax(logits, dim=-1)
-        result = tokenizer.batch_decode(predicted_ids)[0]
-        return result.strip()
+        # 녹음된 오디오 직접 확인
+        st.audio(wav_path, format="audio/wav")
+        # Whisper 모델 가져오기
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        model = st.session_state.whisper_model
+        result = model.transcribe(
+            wav_path,
+            language="ko",
+            fp16=True if device == "cuda" else False,
+            temperature=0.1,
+            best_of=1,
+            beam_size=1
+        )
+        text = result.get("text", "").strip()
+        if not text:
+            return "음성이 인식되지 않았습니다. 다시 시도해 주세요."
+        return text
     except Exception as e:
         return f"음성 인식 중 오류 발생: {str(e)}"
+
+@tool
+def confirm_order(confirm: bool) -> str:
+    """주문을 확정하거나 취소합니다."""
+    order_state = st.session_state.order_state
+    if confirm:
+        order_state.confirmed = True
+        
+        # PyQt 앱에 주문 데이터 전송 (파일 사용)
+        try:
+            import json
+            with open("order_data.json", "w", encoding="utf-8") as f:
+                json.dump(order_state.get_dict(), f, ensure_ascii=False)
+            
+            # 또는 HTTP 요청 사용
+            # requests.post("http://localhost:5000/order", json=order_state.get_dict())
+        except Exception as e:
+            print(f"❌ 주문 데이터 전송 오류: {e}")
+        
+        return f"✅ 주문이 완료되었습니다!\n{get_order_summary('')}\n\n결제를 진행해 주세요."
+    else:
+        order_state.reset()
+        return "🔄 주문을 처음부터 다시 시작합니다."
 
 
 
@@ -258,6 +306,9 @@ def initialize_agent():
     당신은 서보웨이 무인 샌드위치 주문 시스템의 AI 도우미입니다.
     주문 단계에 따라 적절한 도구를 사용해 고객을 안내하세요.
     
+    사용자가 각 단계에서 없는 재료를 말하면 다시 선택할 수 있도록 하세요
+    각 단계 어떤 메뉴가 있는지도 안내 
+
     [주문 단계]
     1. 메뉴 선택 → get_menu_list 사용
     2. 소스 선택 → get_sauce_list 사용

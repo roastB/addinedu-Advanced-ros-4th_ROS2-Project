@@ -199,7 +199,7 @@ class CompletePage(QWidget):
 
 # ============ Streamlit 연동 =================
 # 1. Streamlit 서버 백그라운드 실행 (headless 모드로 브라우저 자동 안 뜨게)
-streamlit_cmd = [sys.executable, "-m", "streamlit", "run", "voice_order_app.py", "--server.headless=True"]
+streamlit_cmd = [sys.executable, "-m", "streamlit", "run", "Serboway_whisper_agent2.py", "--server.headless=True"]
 process = subprocess.Popen(streamlit_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)  # 비동기 실행
 
 # 앱 종료 시 Streamlit 프로세스도 종료하도록 설정
