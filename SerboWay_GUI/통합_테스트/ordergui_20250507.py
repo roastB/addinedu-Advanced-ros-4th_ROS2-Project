@@ -258,10 +258,15 @@ class QRCodeReader(QThread):
             scaled_image = qt_image.scaled(640, 480, Qt.KeepAspectRatio)
             self.imageUpdate.emit(scaled_image)
     
+# QRCodeReader 클래스 수정
+class QRCodeReader(QThread):
+    ...
     def stop(self):
         self.threadActive = False
         if self.cap:
             self.cap.release()
+        self.quit()  # 스레드 완전 종료
+
 
 # =========== QR 코드 결제 페이지
 class QRPaymentPage(QWidget):
@@ -393,8 +398,10 @@ class QRPaymentPage(QWidget):
             else:
                 print(f"❌ 서버 통신 오류: {response.status_code}")
                 
+        except requests.exceptions.RequestException as e:
+            QMessageBox.critical(self, "서버 오류", f"서버 연결 실패: {str(e)}")
         except Exception as e:
-            print(f"❌ 서버 통신 중 오류 발생: {e}")
+            QMessageBox.critical(self, "오류", f"전송 오류: {str(e)}")
 
 # ============ 주문 데이터 감시 기능 추가 =========
 class OrderDataWatcher(QThread):
@@ -467,6 +474,9 @@ def handle_received_order(data, stack, order_data):
     order_data.update(data)
     stack.setCurrentIndex(7)  # 결제 방식 선택 페이지로 이동
 
+if os.path.exists("order_data.json"):
+    os.remove("order_data.json")
+
 def main():
     app = QApplication(sys.argv)
     order_data = {}
@@ -521,6 +531,9 @@ def main():
     main_window.setLayout(main_layout)
     main_window.setWindowTitle("SerboWay Kiosk")
     main_window.resize(500, 600)
+
+    stack.setCurrentIndex(0)  # 환영 페이지(WelcomePage)로 설정
+
     main_window.show()
 
     # Streamlit 서버 실행
