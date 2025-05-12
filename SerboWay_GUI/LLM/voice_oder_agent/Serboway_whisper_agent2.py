@@ -211,7 +211,7 @@ def speech_to_text(tool_input: str = "") -> str:
         
         # 타임아웃 추가
         recording = sd.rec(int(3 * 16000))
-        sd.wait(timeout=5)  # 5초 타임아웃 추가
+        # sd.wait(timeout=5)  # 5초 타임아웃 추가
         
         wav_path = "temp_whisper.wav"
         sf.write(wav_path, recording, 16000)
@@ -227,7 +227,7 @@ def speech_to_text(tool_input: str = "") -> str:
             wav_path,
             language="ko",
             fp16=True if device == "cuda" else False,
-            temperature=0.0,
+            temperature=0.1,
             best_of=1,
             beam_size=1
         )
