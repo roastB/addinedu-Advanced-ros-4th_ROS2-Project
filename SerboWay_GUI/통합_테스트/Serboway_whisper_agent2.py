@@ -77,32 +77,27 @@ class OrderState:
         self.step = "menu"
         self.confirmed = False
 
+    # OrderState 클래스 내 get_dict() 메서드 수정
     def get_dict(self):
-        menu_data = MENU_DATA.get(self.menu, {})
-        veg_data = VEGETABLE_DATA.get(self.vegetable, {})
-        cheese_data = CHEESE_DATA.get(self.cheese, {})
-
         return {
             "menu": {
                 "name": self.menu,
-                "price": menu_data.get("price", 0),
-                "qty": 1  # 음성 주문은 수량 1로 가정
-            } if self.menu else None,
-            "sauce": {
-                "name": self.sauce,
-                "price": 0  # 소스는 가격 없음
-            } if self.sauce else None,
+                "price": MENU_DATA.get(self.menu, {}).get("price", 0),
+                "qty": 1
+            },
+            "sauce": {"name": self.sauce, "price": 0},
             "vegetables": {
                 "name": self.vegetable,
-                "price": veg_data.get("price", 0)
-            } if self.vegetable else None,
+                "price": VEGETABLE_DATA.get(self.vegetable, {}).get("price", 0)
+            },
             "cheese": {
                 "name": self.cheese,
-                "price": cheese_data.get("price", 0)
-            } if self.cheese else None,
+                "price": CHEESE_DATA.get(self.cheese, {}).get("price", 0)
+            },
             "step": self.step,
-            "confirmed": self.confirmed,
+            "confirmed": self.confirmed
         }
+
 
 
     def reset(self):
@@ -221,7 +216,7 @@ def confirm_order(confirm: bool) -> str:
     if confirm:
         order_state.confirmed = True
         # 딕셔너리 구조로 저장
-        with open("order_data.json", "W", encoding="utf-8") as f:
+        with open("order_data.json", "w", encoding="utf-8") as f:   # 대문자 W -> w 로 수정
             json.dump(order_state.get_dict(), f, ensure_ascii=False)
             return f"주문이 완료되었습니다.\n{get_order_summary('')}"
     else:
