@@ -18,6 +18,7 @@ import soundfile as sf
 from gtts import gTTS
 import io
 
+import os
 from dotenv import load_dotenv
 import torch
 
