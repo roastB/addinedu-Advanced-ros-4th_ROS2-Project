@@ -187,3 +187,4 @@ requirements.txt
 # json file 
 Serboway_GUI/통합_테스트/order_data.json
 
+SerboWay_GUI/통합_테스트2/menu.py
