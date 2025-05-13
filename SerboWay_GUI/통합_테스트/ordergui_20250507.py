@@ -1,38 +1,31 @@
-# 시스템, 프로세스 관리를 위한 기본 모듈을 가져옵니다
-import sys, os, atexit, subprocess
+# 시스템 및 프로세스 관리
+import sys
+import os
+import atexit
+import subprocess
+import time
 
-# PyQt5의 GUI 위젯 관련 클래스들을 가져옵니다
+# PyQt5 GUI 위젯
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QLabel, QPushButton, QVBoxLayout,
-    QHBoxLayout, QStackedWidget, QSpinBox, QListWidget, QMessageBox
+    QApplication, QWidget, QLabel, QPushButton,
+    QVBoxLayout, QHBoxLayout, QStackedWidget,
+    QSpinBox, QListWidget, QMessageBox
 )
 
-# PyQt5의 핵심 기능과 상수를 가져옵니다
-from PyQt5.QtCore import Qt
+# PyQt5 핵심 기능 (스레드/신호 처리 포함)
+from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
-# PyQt5의 웹 엔진 모듈을 가져옵니다 (Streamlit과 연동하기 위해 사용)
+# PyQt5 웹 엔진 (Streamlit 연동)
 from PyQt5 import QtWebEngineWidgets, QtCore
 
-# 웹소켓 통신을 위한 모듈을 가져옵니다
-import websockets
-
-# 중복된 import 문들 (코드 정리 필요)
-import sys, os, atexit, subprocess
-import time
-from PyQt5.QtWidgets import QApplication
-from PyQt5 import QtWebEngineWidgets, QtCore
-
-# PyQt5의 스레드와 신호 처리를 위한 클래스들을 가져옵니다
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
-
-# 이미지 처리를 위한 PyQt5 클래스들을 가져옵니다
+# PyQt5 이미지 처리
 from PyQt5.QtGui import QImage, QPixmap
 
-# 카메라 연동을 위한 OpenCV 모듈을 가져옵니다
+# 컴퓨터 비전 및 통신
 import cv2
-
-# QR 코드 해석을 위한 pyzbar 모듈의 decode 함수를 가져옵니다
+import websockets
 from pyzbar.pyzbar import decode
+
 
 
 # ========= 환영 페이지 ============
@@ -672,6 +665,55 @@ class OrderDataWatcher(QThread):
         # 스레드 실행 상태를 중지로 설정합니다
         self.running = False
 
+class PaymentPage(QWidget):
+    def __init__(self, stack, order_data=None):
+        # 부모 클래스(QWidget)의 초기화 메서드를 호출합니다.
+        super().__init__()
+
+        # 페이지 전환을 위한 QStackedWidget 객체를 저장합니다.
+        self.stack = stack
+        # 주문 정보를 저장할 딕셔너리를 저장합니다.
+        self.order_data = order_data
+
+        # 결제 방식 선택 안내 레이블을 생성합니다.
+        label = QLabel("결제 방식 선택")
+        # 레이블을 중앙 정렬합니다.
+        label.setAlignment(Qt.AlignCenter)
+        # 레이블의 글꼴 크기를 키웁니다.
+        label.setStyleSheet("font-size: 36px")
+
+        # 신용카드 결제 버튼을 생성합니다.
+        card_btn = QPushButton("신용카드 결제")
+        # 버튼의 글꼴 크기를 키웁니다.
+        card_btn.setStyleSheet("font-size: 24px")
+
+        # 스마트페이 결제 버튼을 생성합니다.
+        pay_btn = QPushButton("스마트페이")
+        # 버튼의 글꼴 크기를 키웁니다.
+        pay_btn.setStyleSheet("font-size: 24px")
+
+        # QR 코드 결제 버튼을 생성합니다.
+        qr_btn = QPushButton("QR 코드 결제")
+        # 버튼의 글꼴 크기를 키웁니다.
+        qr_btn.setStyleSheet("font-size: 24px")
+
+        # 신용카드 결제 버튼 클릭 시 완료 페이지(예: 인덱스 8)로 이동합니다.
+        card_btn.clicked.connect(lambda: stack.setCurrentIndex(8))
+        # 스마트페이 결제 버튼 클릭 시 완료 페이지(예: 인덱스 8)로 이동합니다.
+        pay_btn.clicked.connect(lambda: stack.setCurrentIndex(8))
+        # QR 코드 결제 버튼 클릭 시 QR 결제 페이지(예: 인덱스 9)로 이동합니다.
+        qr_btn.clicked.connect(lambda: stack.setCurrentIndex(9))
+
+        # 수직 레이아웃을 생성합니다.
+        layout = QVBoxLayout()
+        # 레이아웃에 안내 레이블을 추가합니다.
+        layout.addWidget(label)
+        # 레이아웃에 결제 버튼들을 추가합니다.
+        layout.addWidget(card_btn)
+        layout.addWidget(pay_btn)
+        layout.addWidget(qr_btn)
+        # 위젯에 레이아웃을 설정합니다.
+        self.setLayout(layout)
 
 
 
