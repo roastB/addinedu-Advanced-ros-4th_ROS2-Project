@@ -27,6 +27,10 @@ import websockets
 from pyzbar.pyzbar import decode
 
 
+# HTTP 요청을 위한 모듈을 가져옵니다
+import requests
+# JSON 처리를 위한 모듈을 가져옵니다
+import json
 
 # ========= 환영 페이지 ============
 class WelcomePage(QWidget):
@@ -362,9 +366,9 @@ class CompletePage(QWidget):
 # QR 코드 인식 스레드 클래스
 class QRCodeReader(QThread):
     # 이미지 업데이트를 위한 신호를 정의합니다
-    imageUpdate = pyqtSignal(QImage)
-    # QR 코드 감지를 위한 신호를 정의합니다
-    qrCodeDetected = pyqtSignal(str)
+    imageUpdate = pyqtSignal(QImage)        # 카메라 프레임 업데이트 신호
+    # QR 코드 감지를 위한 신호를 정의합니다 
+    qrCodeDetected = pyqtSignal(str)        # QR 코드 감지 신호
 
     def __init__(self):
         # 부모 클래스의 초기화 메서드를 호출합니다
@@ -423,17 +427,6 @@ class QRCodeReader(QThread):
             self.cap.release()
         # 스레드를 완전히 종료합니다
         self.quit()
-
-    
-# QRCodeReader 클래스 수정
-class QRCodeReader(QThread):
-    ...
-    def stop(self):
-        self.threadActive = False
-        if self.cap:
-            self.cap.release()
-        self.quit()  # 스레드 완전 종료
-
 
 # =========== QR 코드 결제 페이지
 class QRPaymentPage(QWidget):
@@ -580,11 +573,6 @@ class QRPaymentPage(QWidget):
     def send_order_to_server(self, payment_id):
         """주문 정보를 메인 서버로 전송"""
         try:
-            # HTTP 요청을 위한 모듈을 가져옵니다
-            import requests
-            # JSON 처리를 위한 모듈을 가져옵니다
-            import json
-
             # 서버 URL을 설정합니다 (실제 서버 URL로 변경 필요)
             server_url = "http://your-server-url.com/api/orders"
 
