@@ -174,7 +174,7 @@ cython_debug/
 .pypirc
 
 # 가상환경 
-/langchain_venv
+/serboway_venv
 
 /test_venv
 

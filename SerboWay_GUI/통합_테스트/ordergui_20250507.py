@@ -708,7 +708,7 @@ class PaymentPage(QWidget):
 # 1. Streamlit 서버 실행 관련 설정 -------------------------------
 # ============ Streamlit 연동 및 메인 실행 =============
 # Streamlit 서버 포트 번호를 설정합니다
-STREAMLIT_PORT = 8501
+STREAMLIT_PORT = 8502
 
 def start_streamlit():
     # Streamlit 스크립트 파일의 절대 경로를 가져옵니다

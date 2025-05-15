@@ -1,0 +1,21 @@
+{
+  "menu": {
+    "name": null,
+    "price": 0,
+    "qty": 1
+  },
+  "sauce": {
+    "name": null,
+    "price": 0
+  },
+  "vegetables": {
+    "name": "양상추",
+    "price": 0
+  },
+  "cheese": {
+    "name": "슬라이스 치즈",
+    "price": 0
+  },
+  "step": "menu",
+  "confirmed": false
+}
