@@ -5,7 +5,7 @@ from my_msgs.msg import OrderInformation
 class OrderPublisher(Node):
     def __init__(self):
         super().__init__('order_publisher')
-        self.publisher_ = self.create_publisher(OrderInformation, 'control_jetcobot', 10)
+        self.publisher_ = self.create_publisher(OrderInformation, 'control_maker', 10)
         timer_period = 1.0
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.has_published = False

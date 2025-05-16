@@ -12,8 +12,8 @@ import ingredient_stackbot.check_ingredient as ch
 class IngredientSubscriber(Node):
     def __init__(self):
         super().__init__('ingredient_subscriber')
-        self.subscription = self.create_subscription(OrderInformation, 'control_jetcobot', self.listener_callback, 10)  # 큐 사이즈
-        self.publisher = self.create_publisher(Int32MultiArray, 'jetcobot_control', 10)
+        self.subscription = self.create_subscription(OrderInformation, 'control_maker', self.listener_callback, 10)  # 큐 사이즈
+        self.publisher = self.create_publisher(Int32MultiArray, 'maker_control', 10)
 
     def listener_callback(self, msg):
         self.get_logger().info(f'Received id: {msg.id}')
