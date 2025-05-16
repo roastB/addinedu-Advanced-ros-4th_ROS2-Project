@@ -122,3 +122,4 @@ if __name__ == "__main__":
     window = SerbowayApp()
     window.show()
     sys.exit(app.exec_())
+
