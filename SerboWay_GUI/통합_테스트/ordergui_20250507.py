@@ -32,6 +32,10 @@ import requests
 # JSON 처리를 위한 모듈을 가져옵니다
 import json
 
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+
 # ========= 환영 페이지 ============
 class WelcomePage(QWidget):
     def __init__(self, stack):
