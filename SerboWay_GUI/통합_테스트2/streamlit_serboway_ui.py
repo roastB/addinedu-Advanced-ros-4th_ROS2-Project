@@ -56,7 +56,7 @@ if 'order_submitted' not in st.session_state:
 if 'order_id' not in st.session_state:
     st.session_state.order_id = None
 if 'server_url' not in st.session_state:
-    st.session_state.server_url = "http://localhost:5003"
+    st.session_state.server_url = "http://192.168.0.178:5003/"
 
 # Server configuration
 with st.sidebar:
