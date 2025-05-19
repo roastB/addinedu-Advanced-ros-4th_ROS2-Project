@@ -25,7 +25,9 @@ from PyQt5.QtGui import QImage, QPixmap
 import cv2
 import websockets
 from pyzbar.pyzbar import decode
-
+import os
+import json
+import time
 
 # HTTP 요청을 위한 모듈을 가져옵니다
 import requests
@@ -620,9 +622,7 @@ class OrderDataWatcher(QThread):
 
     def run(self):
         # 필요한 모듈을 가져옵니다
-        import os
-        import json
-        import time
+        
 
         # 파일의 마지막 수정 시간을 추적하기 위한 변수를 초기화합니다
         last_modified = 0
