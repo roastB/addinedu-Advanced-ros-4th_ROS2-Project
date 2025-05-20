@@ -1,11 +1,9 @@
 import sys
 import pymysql
 import json
-import random
-import string
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QStackedWidget, QPushButton,
-    QListWidget, QMessageBox, QLabel
+    QListWidget, QMessageBox, QLabel, QTextEdit
 )
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QSize
@@ -13,15 +11,19 @@ from PyQt5.QtGui import QIcon
 
 # DB에서 최신 메뉴 JSON 불러오기
 def get_menu_json():
-    conn = pymysql.connect(
-        host="localhost", user="root", password="1",
-        db="serbobase", charset="utf8mb4"
-    )
-    with conn.cursor() as cursor:
-        cursor.execute("SELECT json_data FROM menu_json ORDER BY id DESC LIMIT 1")
-        row = cursor.fetchone()
-    conn.close()
-    return json.loads(row[0]) if row else None
+    try:
+        conn = pymysql.connect(
+            host="localhost", user="root", password="1",
+            db="serbobase", charset="utf8mb4"
+        )
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT json_data FROM menu_json ORDER BY id DESC LIMIT 1")
+            row = cursor.fetchone()
+        conn.close()
+        return json.loads(row[0]) if row else None
+    except Exception as e:
+        print(f"⚠️ DB 오류: {e}")
+        return None  # 기본 메뉴 데이터 반환
 
 class SerbowayApp(QMainWindow):
     def __init__(self):
@@ -50,8 +52,14 @@ class SerbowayApp(QMainWindow):
         self.page5 = uic.loadUi("6_confirm_order.ui")
         self.page6 = uic.loadUi("7_choose_paymentmethod.ui")
         self.page7 = uic.loadUi("8_order_complete.ui")
-        for page in [self.page0, self.page1, self.page2, self.page3,
-                     self.page4, self.page5, self.page6, self.page7]:
+        self.page8 = uic.loadUi("9_pick_up.ui")
+        self.page9 = uic.loadUi("10_request_collect.ui")
+        self.page10 = uic.loadUi("11_collect_done.ui")
+
+        for page in [
+            self.page0, self.page1, self.page2, self.page3, self.page4,
+            self.page5, self.page6, self.page7, self.page8, self.page9, self.page10
+        ]:
             self.stack.addWidget(page)
 
         # 버튼 연결 및 동적 매핑 설정
@@ -60,21 +68,57 @@ class SerbowayApp(QMainWindow):
 
     def connect_buttons(self):
         def btn(page, name):
-            return page.findChild(QPushButton, name, Qt.FindChildrenRecursively)
+            button = page.findChild(QPushButton, name)
+            if not button:
+                print(f"⚠️ 버튼 누락: {name} 버튼을 찾을 수 없습니다.")
+            return button
 
         # 첫 페이지: 주문 방식 선택
-        btn(self.page0, "voiceBtn").clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        btn(self.page0, "touchBtn").clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        voice_btn = btn(self.page0, "voiceBtn")
+        touch_btn = btn(self.page0, "touchBtn")
+        if voice_btn:
+            voice_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        if touch_btn:
+            touch_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))
 
-        # 결제/재시작/완료 버튼
-        btn(self.page5, "payBtn").clicked.connect(self.go_to_payment)
-        btn(self.page5, "pushButton").clicked.connect(self.restart_order)
-        btn(self.page6, "rfidBtn").clicked.connect(self.complete_order)
+        # 추가/재시작/결제 버튼
+        add_btn = btn(self.page5, "addorderBtn")
+        restart_btn = btn(self.page5, "restartBtn")
+        pay_btn = btn(self.page5, "payBtn")
+        if add_btn:
+            add_btn.clicked.connect(self.add_order)
+        if restart_btn:
+            restart_btn.clicked.connect(self.restart_order)
+        if pay_btn:
+            pay_btn.clicked.connect(self.go_to_payment)
+        
+        # RFID 버튼
+        rfid_btn = btn(self.page6, "rfidBtn")
+        if rfid_btn:
+            rfid_btn.clicked.connect(self.complete_order)
+        
+        # 8_order_complete.ui - OK 버튼 (이미지에서 확인)
+        ok_btn = btn(self.page7, "okBtn")
+        if ok_btn:
+            ok_btn.clicked.connect(lambda: self.stack.setCurrentIndex(8))
+        
+        # 9_pick_up.ui - Pick Up Done 버튼
+        pickup_btn = btn(self.page8, "pickupBtn") 
+        if pickup_btn:
+            pickup_btn.clicked.connect(lambda: self.stack.setCurrentIndex(9))
+        
+        # 10_request_collect.ui - Request Collect 버튼
+        reqcol_btn = btn(self.page9, "reqcolBtn")
+        if reqcol_btn:
+            reqcol_btn.clicked.connect(lambda: self.stack.setCurrentIndex(10))
+        
+        # 11_collect_done.ui - Collect Done 버튼
+        coldone_btn = btn(self.page10, "colDone")
+        if coldone_btn:
+            coldone_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
 
     def populate_dynamic_buttons(self):
-        # -------------------------------
-        # 샌드위치 버튼: (메뉴키, 이미지경로) 매핑
-        # -------------------------------
+        # 샌드위치 버튼 매핑
         sandwich_map = {
             'BulgogiBtn': ('불고기 샌드위치', '/home/addinedu/roscamp-repo-3/SerboWay_GUI/PyQt/Bulgogi141.png'),
             'ShrimpBtn':  ('새우 샌드위치',  '/home/addinedu/roscamp-repo-3/SerboWay_GUI/PyQt/Shrimp141.png'),
@@ -82,37 +126,33 @@ class SerbowayApp(QMainWindow):
         }
 
         for obj_name, (menu_key, img_path) in sandwich_map.items():
-            btn = self.page1.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)
-            # 버튼이 없거나 JSON에 메뉴키가 없으면 건너뛰기
+            btn = self.page1.findChild(QPushButton, obj_name)
             if not btn or menu_key not in self.menu_json.get('menu', {}):
                 continue
 
-            # 배경 이미지 제거
-            btn.setStyleSheet("background-image: none;")
+            # 배경 이미지 제거 + 텍스트 정렬
+            btn.setStyleSheet("""
+                QPushButton {
+                    background-image: none;
+                    text-align: center;
+                }
+            """)
 
             # 아이콘 설정
             btn.setIcon(QIcon(img_path))
             btn.setIconSize(QSize(128, 128))
 
-            # 텍스트 설정 (메뉴명 + 가격)
-            price = self.menu_json['menu'][menu_key]['price']
-            # btn.setText(f"{menu_key}\n({price}원)")
-
-            
-
-            # 클릭 시 select_sandwich(menu_key) 호출
+            # 클릭 시 이벤트 연결
             try:
                 btn.clicked.disconnect()
             except TypeError:
                 pass
             btn.clicked.connect(lambda _, m=menu_key: self.select_sandwich(m))
 
-        # -------------------------------
-        # 소스 버튼 매핑 (텍스트만)
-        # -------------------------------
+        # 소스 버튼 매핑
         sauce_map = {'ItalianBtn': '이탈리안', 'ChillyBtn': '칠리'}
         for obj_name, sauce_key in sauce_map.items():
-            btn = self.page2.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)
+            btn = self.page2.findChild(QPushButton, obj_name)
             if btn and sauce_key in self.menu_json.get('sauce', {}):
                 price = self.menu_json['sauce'][sauce_key].get('price', 0)
                 btn.setText(f"{sauce_key}\n(+{price}원)")
@@ -122,12 +162,10 @@ class SerbowayApp(QMainWindow):
                     pass
                 btn.clicked.connect(lambda _, s=sauce_key: self.select_sauce(s))
 
-        # -------------------------------
         # 야채 버튼 매핑
-        # -------------------------------
         veg_map = {'LettuceBtn': '양상추', 'RomaineBtn': '로메인', 'BazilBtn': '바질'}
         for obj_name, veg_key in veg_map.items():
-            btn = self.page3.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)
+            btn = self.page3.findChild(QPushButton, obj_name)
             if btn and veg_key in self.menu_json.get('vegetable', {}):
                 price = self.menu_json['vegetable'][veg_key].get('price', 0)
                 btn.setText(f"{veg_key}\n(+{price}원)")
@@ -137,16 +175,14 @@ class SerbowayApp(QMainWindow):
                     pass
                 btn.clicked.connect(lambda _, v=veg_key: self.select_vegetable(v))
 
-        # -------------------------------
         # 치즈 버튼 매핑
-        # -------------------------------
         cheese_map = {
-            'SliceBtn':      '슬라이스 치즈',
-            'ShredBtn':      '슈레드 치즈',
+            'SliceBtn': '슬라이스 치즈',
+            'ShredBtn': '슈레드 치즈',
             'MozzarellaBtn': '모짜렐라 치즈'
         }
         for obj_name, cheese_key in cheese_map.items():
-            btn = self.page4.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)
+            btn = self.page4.findChild(QPushButton, obj_name)
             if btn and cheese_key in self.menu_json.get('cheese', {}):
                 price = self.menu_json['cheese'][cheese_key].get('price', 0)
                 btn.setText(f"{cheese_key}\n(+{price}원)")
@@ -157,9 +193,7 @@ class SerbowayApp(QMainWindow):
                 btn.clicked.connect(lambda _, c=cheese_key: self.select_cheese(c))
 
         # 주문 리스트 위젯 참조
-        self.order_list_widget = self.page5.findChild(
-            QListWidget, "listWidget", Qt.FindChildrenRecursively
-        )
+        self.order_list_widget = self.page5.findChild(QTextEdit, "orderList")
 
     def select_sandwich(self, name):
         self.current_sandwich = name
@@ -197,16 +231,18 @@ class SerbowayApp(QMainWindow):
         })
 
     def update_order_list(self):
-        self.order_list_widget.clear()
         total = 0
+        lines = []
         for item in self.order_data['menu']:
             text = (
-                f"{item['name']} ({item['sauce']}/{item['vegetable']}/{item['cheese']}) "
-                f"x{item['qty']} - {item['price']}원"
+                f"{item['name']} x{item['qty']}\n"
+                f"{item['sauce']}\n{item['vegetable']}\n{item['cheese']}\n"
+                f"{item['price']}원"
             )
-            self.order_list_widget.addItem(text)
+            lines.append(text)
             total += item['price'] * item['qty']
-        lbl = self.page5.findChild(QLabel, "summaryLabel", Qt.FindChildrenRecursively)
+        self.order_list_widget.setPlainText("\n\n".join(lines))
+        lbl = self.page5.findChild(QLabel, "totalPrice")
         if lbl:
             lbl.setText(f"총 합계: {total}원")
 
@@ -223,6 +259,16 @@ class SerbowayApp(QMainWindow):
     def restart_order(self):
         self.order_data = {'menu': []}
         self.stack.setCurrentIndex(1)
+
+    def add_order(self):
+        # 현재 선택 정보 초기화
+        self.current_sandwich = None
+        self.selected_sauce = None
+        self.selected_vegetable = None
+        self.selected_cheese = None
+        # 샌드위치 선택 페이지(2_choose_sandwich.ui)로 이동
+        self.stack.setCurrentIndex(1)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
