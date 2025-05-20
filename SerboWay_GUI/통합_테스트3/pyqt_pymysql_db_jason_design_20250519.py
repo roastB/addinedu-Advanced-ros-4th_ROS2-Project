@@ -1,19 +1,37 @@
-import sys
-import pymysql
-import json
-import random
-import string
+# ===================== 표준 라이브러리 (Python Built-in Modules) =====================
+import sys  # 시스템 관련 기능(프로그램 종료, 경로 조작 등)
+import os  # 운영체제 인터페이스(파일 경로, 환경변수 등)
+import json  # JSON 데이터 처리
+import random  # 난수 생성(영수증 번호 생성용)
+import string  # 문자열 유틸리티(영수증 번호 생성용)
+import socket  # 네트워크 통신(음성 주문-키오스크 간 TCP 통신)
+import subprocess  # 외부 프로세스 실행(Streamlit 서버 실행)
+import signal  # 신호 처리(프로세스 제어)
+from datetime import datetime  # 시간 관련 기능(주문 타임스탬프)
+from typing import Optional, Dict, Any, List  # 타입 힌트
+# import pymysql  # MySQL 데이터베이스 연결
+import requests  # HTTP 요청 처리(메인 서버 API 호출)
+
+# ============== PyQt 모듈 ==================
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QStackedWidget, QPushButton,
     QListWidget, QMessageBox, QLabel
 )
 from PyQt5 import uic
-from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon
 import requests
+from PyQt5.QtCore import QTimer, pyqtSignal, QUrl, Qt, QSize  # 이벤트 루프, 시그널, 타이머
+# 웹 엔진
+from PyQt5.QtWebEngineWidgets import QWebEngineView  # 웹뷰(Streamlit 표시용)
 
+# ============== 메인 서버 설정 ================
 MENU_SERVER_URL = "http://192.168.0.178:5003/api/menu"  # 메뉴 정보 API 주소
 ORDER_SERVER_URL = "http://192.168.0.178:5003/api/order"  # 주문 전송 API 주소
+
+# ============ Streamlit 설정 =============
+STREAMLIT_PORT = 8502  # Streamlit 서버 포트
+STREAMLIT_SCRIPT = "voice_agent.py"  # 음성 에이전트 스크립트 경로
+
 
 # DB에서 최신 메뉴 JSON 불러오기
 # def get_menu_json():
@@ -27,6 +45,7 @@ ORDER_SERVER_URL = "http://192.168.0.178:5003/api/order"  # 주문 전송 API �
 #     conn.close()
 #     return json.loads(row[0]) if row else None
 
+# ========= 메인 서버와 통신 ============
 def send_order_to_server(order_data):
     """주문 정보를 메인 서버로 전송"""
     try:
@@ -74,8 +93,43 @@ def get_menu_json(server_url=MENU_SERVER_URL, local_file="menu_data.json"):
     print("메뉴 데이터를 불러오지 못했습니다. 기본 구조를 사용합니다.")
     return {"menu": {}, "sauce": {}, "vegetable": {}, "cheese": {}}
 
+# ============ Kiosk server 실행 ====================
+class KioskServer:
+    """TCP 서버 클래스 (음성 에이전트와 통신)"""
+    def __init__(self):
+        self.socket = None
+        self.running = False
+        self.current_order = None
+        self.payment_result = None
+
+    def start(self, host='0.0.0.0', port=12345):
+        """TCP 서버 시작"""
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.bind((host, port))
+            self.socket.listen(1)
+            self.running = True
+            print(f"키오스크 TCP 서버 시작: {host}:{port}")
+        except Exception as e:
+            print(f"TCP 서버 시작 오류: {e}")
+
+    def handle_connection(self):
+        """클라이언트 연결 처리"""
+        while self.running:
+            try:
+                client, addr = self.socket.accept()
+                data = client.recv(4096)
+                self.current_order = json.loads(data.decode())
+                print("음성 주문 수신:", self.current_order)
+                client.send(json.dumps({"status": "received"}).encode())
+                client.close()
+            except Exception as e:
+                print(f"클라이언트 처리 오류: {e}")
+
+# ==================
 
 class SerbowayApp(QMainWindow):
+    """메인 키오스크 애플리케이션"""
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Serboway Kiosk")
