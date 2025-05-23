@@ -14,8 +14,8 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/OrderInformation.msg"
   "msg/CompleteOrder.msg"
-  #"msg/MarkerPose.msg"
-  #"msg/MarkerPoseArray.msg"
+  "srv/CheckOrderBuffer.srv" 
+  "srv/MakerStatus.srv"
   DEPENDENCIES std_msgs
 )
 

@@ -21,9 +21,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'control_server = serboway_system.jetcobot_commend.serboway_control_server:main',
-            'db_order_manager = serboway_system.order_management.db_order_manager:main',
-            'order_buffer = serboway_system.order_management.order_buffer_node:main',
+            'order_save = serboway_system.order_save:main',
+            'order_process = serboway_system.order_process:main',
             'task_allocator = serboway_system.pinky_task_allocation.simplified_pinky_allocator:main',
         ],
     },
