@@ -14,7 +14,7 @@ from typing import Optional, Dict, Any, List  # 타입 힌트
 import requests  # HTTP 요청 처리(메인 서버 API 호출)
 import webbrowser  # [Streamlit 연동 추가] 웹브라우저 띄우기
 import threading
-
+from PyQt5.QtCore import QLoggingCategory
 # ============== PyQt 모듈 ==================
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QStackedWidget, QPushButton,
@@ -31,11 +31,13 @@ class VoiceOrderEvent(QEvent):
         super().__init__(QEvent.User)
 
 # ============== 메인 서버 설정 ================
-ORDER_SERVER_URL = "http://192.168.0.145:5003/"  # 주문 전송 API 주소
+ORDER_SERVER_URL = "http://192.168.0.6:5003/"  # 주문 전송 API 주소
 
 # ============ Streamlit 설정 =============
 STREAMLIT_PORT = 8501  # Streamlit 서버 포트
 STREAMLIT_SCRIPT = "Serboway_whisper_agent3.py"  # 음성 에이전트 스크립트 경로
+
+# t
 TABLE_NUM = 1
 
 # ========= 메인 서버와 통신 ============
@@ -94,8 +96,11 @@ class SerbowayApp(QMainWindow):
         self.setGeometry(200, 200, 600, 500)
 
         self.voice_order_data = None
+
         self.tcp_server_thread = threading.Thread(target=self.run_tcp_server, daemon=True)
         self.tcp_server_thread.start()
+
+
         # JSON 메뉴 로드
         self.menu_json = get_menu_json()
         self.order_data = {'menu': []}
@@ -120,14 +125,9 @@ class SerbowayApp(QMainWindow):
         self.page5 = uic.loadUi("UI/6_confirm_order.ui")
         self.page6 = uic.loadUi("UI/7_choose_paymentmethod.ui")
         self.page7 = uic.loadUi("UI/8_order_complete.ui")
-        # self.page8 = uic.loadUi("UI/9_pick_up.ui")
-        # self.page9 = uic.loadUi("UI/10_request_collect.ui")
-        # self.page10 = uic.loadUi("UI/11_collect_done.ui")
 
-        for page in [
-            self.page0, self.page1, self.page2, self.page3, self.page4,
-            self.page5, self.page6, self.page7, self.page8
-        ]:
+        for page in [self.page0, self.page1, self.page2, self.page3,
+                     self.page4, self.page5, self.page6, self.page7]:
             self.stack.addWidget(page)
 
         # 버튼 연결 및 동적 매핑 설정
@@ -143,41 +143,10 @@ class SerbowayApp(QMainWindow):
         btn(self.page0, "voiceButton").clicked.connect(self.launch_streamlit_voice_order)
         btn(self.page0, "touchButton").clicked.connect(lambda: self.stack.setCurrentIndex(1))
 
-        # 추가/재시작/결제 버튼
-        add_btn = btn(self.page5, "addorderBtn")
-        restart_btn = btn(self.page5, "restartBtn")
-        pay_btn = btn(self.page5, "payBtn")
-        if add_btn:
-            add_btn.clicked.connect(self.add_order)
-        if restart_btn:
-            restart_btn.clicked.connect(self.restart_order)
-        if pay_btn:
-            pay_btn.clicked.connect(self.go_to_payment)
-        
-        # RFID 버튼
-        rfid_btn = btn(self.page6, "rfidBtn")
-        if rfid_btn:
-            rfid_btn.clicked.connect(self.complete_order)
-        
-        # 8_order_complete.ui - OK 버튼 (이미지에서 확인)
-        ok_btn = btn(self.page7, "okBtn")
-        if ok_btn:
-            ok_btn.clicked.connect(lambda: self.stack.setCurrentIndex(8))
-        
-        # # 9_pick_up.ui - Pick Up Done 버튼
-        # pickup_btn = btn(self.page8, "pickupBtn") 
-        # if pickup_btn:
-        #     pickup_btn.clicked.connect(lambda: self.stack.setCurrentIndex(9))
-        
-        # # 10_request_collect.ui - Request Collect 버튼
-        # reqcol_btn = btn(self.page9, "reqcolBtn")
-        # if reqcol_btn:
-        #     reqcol_btn.clicked.connect(lambda: self.stack.setCurrentIndex(10))
-        
-        # # 11_collect_done.ui - Collect Done 버튼
-        # coldone_btn = btn(self.page10, "colDone")
-        # if coldone_btn:
-        #     coldone_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        # 결제/재시작/완료 버튼
+        btn(self.page5, "confirmButton").clicked.connect(self.go_to_payment)
+        btn(self.page5, "homeButton").clicked.connect(self.restart_order)
+        btn(self.page6, "pushButton").clicked.connect(self.complete_order)
 
     # [Streamlit 연동 추가] 음성 주문 버튼 클릭 시 Streamlit 서버 실행 및 브라우저 접속
     def launch_streamlit_voice_order(self):
@@ -188,16 +157,15 @@ class SerbowayApp(QMainWindow):
         # Streamlit 서버가 이미 실행 중인지 확인
         if self.streamlit_proc is None or self.streamlit_proc.poll() is not None:
             # Streamlit 서버 실행 (subprocess)
-            self.streamlit_proc = subprocess.Popen(
-                [
-                    "streamlit", "run", STREAMLIT_SCRIPT,
-                    "--server.headless=true",
-                    f"--server.port={STREAMLIT_PORT}"
-                ],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            self.streamlit_proc = subprocess.Popen([
+                "streamlit", "run", STREAMLIT_SCRIPT,
+                "--server.headless=true",
+                f"--server.port={STREAMLIT_PORT}"
+            ],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
-        # 웹브라우저로 Streamlit UI 오픈
-        webbrowser.open(f"http://localhost:{STREAMLIT_PORT}")
+            # 웹브라우저로 Streamlit UI 오픈
+            webbrowser.open(f"http://localhost:{STREAMLIT_PORT}")
 
     def populate_dynamic_buttons(self):
         # -------------------------------
@@ -296,6 +264,7 @@ class SerbowayApp(QMainWindow):
         self.stack.setCurrentIndex(5)
         self.update_order_list()
 
+    # 사용자가 샌드위치, 소스, 야채, 치즈를 선택한 뒤 해당 선택을 목록에 추가
     def save_order_item(self):
         base_price = self.menu_json['menu'][self.current_sandwich]['price']
         opt_price = (
@@ -320,7 +289,7 @@ class SerbowayApp(QMainWindow):
             "cheese": self.selected_cheese,
             "price": unit_price
         }
-
+    # 주문 내역을 UI에 표시 하고 총 금액을 계산해서 보여준다.
     def update_order_list(self):
         self.order_list_widget.clear()
         total = 0
@@ -334,7 +303,7 @@ class SerbowayApp(QMainWindow):
         lbl = self.page5.findChild(QLabel, "summaryLabel", Qt.FindChildrenRecursively)
         if lbl:
             lbl.setText(f"총 합계: {total}원")
-
+    # 결제 화면으로 이동
     def go_to_payment(self):
         if not self.order_data['menu']:
             QMessageBox.warning(self, "경고", "주문 내역이 없습니다.")
@@ -405,8 +374,12 @@ class SerbowayApp(QMainWindow):
         super().closeEvent(event)
 
     def run_tcp_server(self):
+        # while true:
+        #     print("Server!!!!!!!!!!!!!!!!!!!!!!!!!!")
         KIOSK_HOST = "192.168.0.159"
-        KIOSK_PORT = 12345
+        # KIOSK_PORT = 650
+        KIOSK_PORT = 5050
+
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((KIOSK_HOST, KIOSK_PORT))
@@ -471,3 +444,4 @@ if __name__ == "__main__":
     window = SerbowayApp()
     window.show()
     sys.exit(app.exec_())
+    QLoggingCategory.setFilterRules("*.debug=false\n*.info=false\n*.warning=false\n*.critical=true")    # 내부 디버그 메세지 숨김
