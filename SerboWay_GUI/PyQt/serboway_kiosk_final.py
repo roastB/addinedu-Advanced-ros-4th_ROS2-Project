@@ -24,14 +24,14 @@ class SerbowayApp(QMainWindow):
         self.setCentralWidget(self.stack)
 
         # 각 UI 로딩
-        self.page0 = uic.loadUi("/home/addinedu/dev_ws/PyQT/1_choose_ordermethod.ui")
-        self.page1 = uic.loadUi("/home/addinedu/dev_ws/PyQT/2_choose_sandwich.ui")
-        self.page2 = uic.loadUi("/home/addinedu/dev_ws/PyQT/3_choose_sauce.ui")
-        self.page3 = uic.loadUi("/home/addinedu/dev_ws/PyQT/4_choose_vegetables.ui")
-        self.page4 = uic.loadUi("/home/addinedu/dev_ws/PyQT/5_choose_cheese.ui")
-        self.page5 = uic.loadUi("/home/addinedu/dev_ws/PyQT/6_confirm_order.ui")
-        self.page6 = uic.loadUi("/home/addinedu/dev_ws/PyQT/7_choose_paymentmethod.ui")
-        self.page7 = uic.loadUi("/home/addinedu/dev_ws/PyQT/8_order_complete.ui")
+        self.page0 = uic.loadUi("1_choose_ordermethod.ui")
+        self.page1 = uic.loadUi("2_choose_sandwich.ui")
+        self.page2 = uic.loadUi("3_choose_sauce.ui")
+        self.page3 = uic.loadUi("4_choose_vegetables.ui")
+        self.page4 = uic.loadUi("PyQT/5_choose_cheese.ui")
+        self.page5 = uic.loadUi("6_confirm_order.ui")
+        self.page6 = uic.loadUi("7_choose_paymentmethod.ui")
+        self.page7 = uic.loadUi("8_order_complete.ui")
 
         for page in [self.page0, self.page1, self.page2, self.page3, self.page4, self.page5, self.page6, self.page7]:
             self.stack.addWidget(page)
