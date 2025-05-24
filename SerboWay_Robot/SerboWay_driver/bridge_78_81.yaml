@@ -1,0 +1,21 @@
+name: bridge_78_81
+
+from_domain: 78
+to_domain:   81
+
+topics:
+  /robot_pose:
+    type: geometry_msgs/msg/PointStamped
+    bidirectional: false
+
+  /robot_front:
+    type: geometry_msgs/msg/PointStamped
+    bidirectional: false
+
+  /target_point:
+    type: geometry_msgs/msg/PointStamped
+    bidirectional: false
+
+  /arrived:
+    type: std_msgs/msg/Empty
+    bidirectional: false
