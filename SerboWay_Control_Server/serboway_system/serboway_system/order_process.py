@@ -41,6 +41,12 @@ class OrderBufferChecker(Node):
             'pinky_dist3': None
         }
         
+        # 배송 대기 상태 관리
+        self.selected_pinky_for_delivery = None  # 선택된 Pinky 정보
+        self.is_sandwich_ready = False  # 샌드위치 제조 완료 여부
+        self.is_pinky_at_serving_position = False  # Pinky 서빙위치 도착 여부
+        self.is_monitoring_delivery_status = False  # 배송 모니터링 활성화 여부
+        
         # 서비스 연결 대기
         while not self.cli.wait_for_service(timeout_sec=2.0):
             self.get_logger().info('[...] 서비스 서버 대기 중')
@@ -80,6 +86,10 @@ class OrderBufferChecker(Node):
         
         self.pinky_dist3_sub = self.create_subscription(
             Float32, 'pinky_dist3', self.pinky_dist3_callback, 10)
+        
+        # 배송 상태 확인용 구독자들 추가
+        self.sandwich_ready_sub = self.create_subscription(
+            Bool, 'sandwich_ready', self.sandwich_ready_callback, 10)
         
         # 모니터링 상태 플래그들
         self.is_monitoring_pinky_status = False
@@ -164,7 +174,7 @@ class OrderBufferChecker(Node):
             command_msg = String()
             command_msg.data = "Start Make Sandwich"
             self.make_command_pub.publish(command_msg)
-            self.get_logger().info('[✔] maker_status: 대기중 → 샌드위치 제작 명령 Publish')
+            self.get_logger().info('[✅] maker_status: 대기중 → 샌드위치 제작 명령 Publish')
             
             # 샌드위치 제작 명령 발행 후 Pinky 상태 모니터링 시작
             self.start_pinky_status_monitoring()
@@ -179,6 +189,9 @@ class OrderBufferChecker(Node):
     def pinky_status_callback(self, msg: Int32):
         """pinky_status 구독 콜백"""
         if not self.is_monitoring_pinky_status:
+            # 배송 모니터링 중일 때 서빙위치 도착 확인
+            if (self.is_monitoring_delivery_status and self.selected_pinky_for_delivery == 'pinky_status' and msg.data == 8):  # 서빙위치=8
+                self.pinky_arrived_at_serving_position()
             return
             
         self.pinky_status_values['pinky_status'] = msg.data
@@ -189,6 +202,9 @@ class OrderBufferChecker(Node):
     def pinky_status2_callback(self, msg: Int32):
         """pinky_status2 구독 콜백"""
         if not self.is_monitoring_pinky_status:
+            # 배송 모니터링 중일 때 서빙위치 도착 확인
+            if (self.is_monitoring_delivery_status and self.selected_pinky_for_delivery == 'pinky_status2' and msg.data == 8):  # 서빙위치=8
+                self.pinky_arrived_at_serving_position()
             return
             
         self.pinky_status_values['pinky_status2'] = msg.data
@@ -199,6 +215,9 @@ class OrderBufferChecker(Node):
     def pinky_status3_callback(self, msg: Int32):
         """pinky_status3 구독 콜백"""
         if not self.is_monitoring_pinky_status:
+            # 배송 모니터링 중일 때 서빙위치 도착 확인
+            if (self.is_monitoring_delivery_status and self.selected_pinky_for_delivery == 'pinky_status3' and msg.data == 8):  # 서빙위치=8
+                self.pinky_arrived_at_serving_position()
             return
             
         self.pinky_status_values['pinky_status3'] = msg.data
@@ -353,6 +372,8 @@ class OrderBufferChecker(Node):
             pinky_command_msg = Int32()
             pinky_command_msg.data = pinky_command_value
             self.pinky_command_pub.publish(pinky_command_msg)
+
+            time.sleep(1)
             
             # 서빙 위치로 이동 태스크 발행 (서빙위치=8)
             pinky_task_msg = Int32()
@@ -371,13 +392,110 @@ class OrderBufferChecker(Node):
             self.get_logger().info(f'   -> pinky_command: {pinky_command_value} (Pinky {pinky_name} 지정)')
             self.get_logger().info(f'   -> pinky_task: 8 (서빙위치로 이동)')
             
-            # 명령 전송 후 모니터링 상태 리셋 (중복 명령 방지)
-            self.reset_monitoring_flags()
+            # 배송 대기 상태로 전환
+            self.start_delivery_monitoring(selected_pinky)
+            
+            # 초기 모니터링 상태 리셋 (중복 명령 방지)
+            self.reset_initial_monitoring_flags()
         else:
             self.get_logger().error(f'알 수 없는 Pinky: {selected_pinky}')
 
-    def reset_monitoring_flags(self):
-        """모니터링 플래그들 리셋"""
+    def start_delivery_monitoring(self, selected_pinky):
+        """배송 대기 모니터링 시작"""
+        self.selected_pinky_for_delivery = selected_pinky
+        self.is_sandwich_ready = False
+        self.is_pinky_at_serving_position = False
+        self.is_monitoring_delivery_status = True
+        
+        pinky_name = self.get_pinky_name_from_status(selected_pinky)
+        self.get_logger().info(f'[🚚] 배송 대기 모니터링 시작 - Pinky {pinky_name}')
+        self.get_logger().info('   -> 샌드위치 제조 완료 대기 중...')
+        self.get_logger().info('   -> Pinky 서빙위치 도착 대기 중...')
+
+    def sandwich_ready_callback(self, msg: Bool):
+        """샌드위치 제조 완료 구독 콜백"""
+        if not self.is_monitoring_delivery_status:
+            return
+            
+        if msg.data:  # 샌드위치 제조 완료
+            self.is_sandwich_ready = True
+            self.get_logger().info('[✔✔] 샌드위치 제조 완료!')
+            self.check_delivery_ready()
+
+    def pinky_arrived_at_serving_position(self):
+        """Pinky 서빙위치 도착 확인"""
+        if not self.is_monitoring_delivery_status:
+            return
+            
+        self.is_pinky_at_serving_position = True
+        pinky_name = self.get_pinky_name_from_status(self.selected_pinky_for_delivery)
+        self.get_logger().info(f'[✔✔] Pinky {pinky_name} 서빙위치 도착 완료!')
+        self.check_delivery_ready()
+
+    def check_delivery_ready(self):
+        """샌드위치 제조 완료 && Pinky 서빙위치 도착 확인"""
+        if self.is_sandwich_ready and self.is_pinky_at_serving_position:
+            pinky_name = self.get_pinky_name_from_status(self.selected_pinky_for_delivery)
+            self.get_logger().info(f'[✅] 배송 준비 완료! Pinky {pinky_name}에게 배송 명령 전송')
+            
+            # 배송 명령 전송 (테이블 번호: 1, 2, 3 중 하나)
+            # TODO: 실제로는 주문 정보에서 테이블 번호를 가져와야 함
+            table_number = 1  # 임시로 테이블 1번으로 설정
+            self.send_table_delivery_command(table_number)
+
+    def send_table_delivery_command(self, table_number):
+        """선택된 Pinky에게 테이블 배송 명령 전송"""
+        if table_number not in [1, 2, 3]:
+            self.get_logger().error(f'잘못된 테이블 번호: {table_number}')
+            return
+            
+        # Pinky 번호 가져오기
+        pinky_command_value = self.pinky_command_mapping.get(self.selected_pinky_for_delivery)
+        
+        if pinky_command_value is not None:
+            # Pinky 번호 발행
+            pinky_command_msg = Int32()
+            pinky_command_msg.data = pinky_command_value
+            self.pinky_command_pub.publish(pinky_command_msg)
+            
+            time.sleep(1)
+            
+            # 테이블 배송 태스크 발행 (table1=1, table2=2, table3=3)
+            pinky_task_msg = Int32()
+            pinky_task_msg.data = table_number
+            self.pinky_task_pub.publish(pinky_task_msg)
+            
+            pinky_name = self.get_pinky_name_from_status(self.selected_pinky_for_delivery)
+            self.get_logger().info(f'[🚀] Pinky {pinky_name}에게 테이블 {table_number} 배송 명령 전송!')
+            self.get_logger().info(f'   -> pinky_command: {pinky_command_value} (Pinky {pinky_name} 지정)')
+            self.get_logger().info(f'   -> pinky_task: {table_number} (테이블 {table_number}으로 배송)')
+            
+            # 배송 모니터링 완료
+            self.reset_delivery_monitoring()
+        else:
+            self.get_logger().error(f'알 수 없는 Pinky: {self.selected_pinky_for_delivery}')
+
+    def get_pinky_name_from_status(self, status_key):
+        """상태 키에서 Pinky 이름 추출"""
+        if status_key == 'pinky_status':
+            return '1'
+        elif status_key == 'pinky_status2':
+            return '2'
+        elif status_key == 'pinky_status3':
+            return '3'
+        else:
+            return '1'  # 기본값
+
+    def reset_delivery_monitoring(self):
+        """배송 모니터링 상태 리셋"""
+        self.selected_pinky_for_delivery = None
+        self.is_sandwich_ready = False
+        self.is_pinky_at_serving_position = False
+        self.is_monitoring_delivery_status = False
+        self.get_logger().info('[✔] 배송 모니터링 완료 - 상태 리셋')
+
+    def reset_initial_monitoring_flags(self):
+        """초기 모니터링 플래그들만 리셋 (배송 모니터링은 유지)"""
         self.is_monitoring_pinky_status = False
         self.is_monitoring_pinky_distance = False
         
@@ -398,6 +516,11 @@ class OrderBufferChecker(Node):
             'pinky_dist2': None,
             'pinky_dist3': None
         }
+
+    def reset_monitoring_flags(self):
+        """모든 모니터링 플래그들 리셋"""
+        self.reset_initial_monitoring_flags()
+        self.reset_delivery_monitoring()
 
 def main(args=None):
     rclpy.init(args=args)

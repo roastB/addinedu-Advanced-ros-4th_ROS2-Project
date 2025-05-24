@@ -353,6 +353,8 @@ class OrderBufferChecker(Node):
             pinky_command_msg = Int32()
             pinky_command_msg.data = pinky_command_value
             self.pinky_command_pub.publish(pinky_command_msg)
+
+            time.sleep(1)
             
             # 서빙 위치로 이동 태스크 발행 (서빙위치=8)
             pinky_task_msg = Int32()

@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'order_save = serboway_system.order_save:main',
+            #'order_http = serboway_system.order_http:main',
             'order_process = serboway_system.order_process:main',
             'task_allocator = serboway_system.pinky_task_allocation.simplified_pinky_allocator:main',
         ],
