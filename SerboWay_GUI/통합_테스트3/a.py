@@ -31,7 +31,7 @@ class VoiceOrderEvent(QEvent):
         super().__init__(QEvent.User)
 
 # ============== 메인 서버 설정 ================
-ORDER_SERVER_URL = "http://192.168.0.6:5003/"  # 주문 전송 API 주소
+ORDER_SERVER_URL = "http://192.168.0.178:5003/"  # 주문 전송 API 주소
 
 # ============ Streamlit 설정 =============
 STREAMLIT_PORT = 8501  # Streamlit 서버 포트
