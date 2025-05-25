@@ -180,6 +180,8 @@ cython_debug/
 
 /test_qt5
 
+/kiosk_venv
+
 
 # jj 추가
 checkerboards/
