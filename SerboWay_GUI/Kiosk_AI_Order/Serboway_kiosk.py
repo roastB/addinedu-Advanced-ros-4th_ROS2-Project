@@ -205,9 +205,12 @@ class SerbowayApp(QMainWindow):
             pay_btn.clicked.connect(self.go_to_payment)  # 결제 페이지 이동 함수와 연결
 
         # ========== 결제 페이지 버튼 ==========
+        #  rfid_btn.clicked.connect(self.complete_order)  # 주문 완료 함수와 연결
         rfid_btn = btn(self.page6, "rfidBtn")  # RFID 결제 버튼
         if rfid_btn:  # RFID 버튼이 존재하면
-            rfid_btn.clicked.connect(self.complete_order)  # 주문 완료 함수와 연결
+            rfid_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(11)
+            )  # 주문 완료 함수와 연결
 
         # ========== 나머지 페이지 버튼들 (기존 코드 유지) ==========
         # 8_order_complete.ui - OK 버튼
