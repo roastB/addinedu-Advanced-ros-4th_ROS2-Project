@@ -15,10 +15,17 @@ import requests  # HTTP 요청 처리(메인 서버 API 호출)
 import webbrowser  # [Streamlit 연동 추가] 웹브라우저 띄우기
 import threading
 from PyQt5.QtCore import QLoggingCategory
+
 # ============== PyQt 모듈 ==================
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QStackedWidget, QPushButton,
-    QListWidget, QMessageBox, QLabel, QTextEdit
+    QApplication,
+    QMainWindow,
+    QStackedWidget,
+    QPushButton,
+    QListWidget,
+    QMessageBox,
+    QLabel,
+    QTextEdit,
 )
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
@@ -26,12 +33,15 @@ from PyQt5.QtCore import Qt, QSize
 
 from PyQt5.QtCore import QEvent
 
+
 class VoiceOrderEvent(QEvent):
     def __init__(self):
         super().__init__(QEvent.User)
 
+
 # ============== 메인 서버 설정 ================
-ORDER_SERVER_URL = "http://192.168.0.6:5003/"  # 주문 전송 API 주소
+# ORDER_SERVER_URL = "http://192.168.0.6:5003/"  # 주문 전송 API 주소
+ORDER_SERVER_URL = "http://192.168.55.177:5003"
 
 # ============ Streamlit 설정 =============
 STREAMLIT_PORT = 8501  # Streamlit 서버 포트
@@ -39,6 +49,7 @@ STREAMLIT_SCRIPT = "Serboway_voice_order.py"  # 음성 에이전트 스크립트
 
 # Table Number 고정
 TABLE_NUM = 1
+
 
 # ========= 메인 서버와 통신 ============
 def send_order_to_server(order_data):
@@ -50,6 +61,7 @@ def send_order_to_server(order_data):
     except Exception as e:
         print(f"주문 서버 연결 실패: {e}")
         return {"status": "fail", "message": str(e)}
+
 
 def get_menu_json(server_url=ORDER_SERVER_URL, local_file="menu.json"):
     """
@@ -88,8 +100,10 @@ def get_menu_json(server_url=ORDER_SERVER_URL, local_file="menu.json"):
     print("메뉴 데이터를 불러오지 못했습니다. 기본 구조를 사용합니다.")
     return {"menu": {}, "sauce": {}, "vegetable": {}, "cheese": {}}
 
+
 class SerbowayApp(QMainWindow):
     """메인 키오스크 애플리케이션"""
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Serboway Kiosk")
@@ -97,13 +111,14 @@ class SerbowayApp(QMainWindow):
 
         self.voice_order_data = None
 
-        self.tcp_server_thread = threading.Thread(target=self.run_tcp_server, daemon=True)
+        self.tcp_server_thread = threading.Thread(
+            target=self.run_tcp_server, daemon=True
+        )
         self.tcp_server_thread.start()
-
 
         # JSON 메뉴 로드
         self.menu_json = get_menu_json()
-        self.order_data = {'menu': []}
+        self.order_data = {"menu": []}
         self.current_sandwich = None
         self.selected_sauce = None
         self.selected_vegetable = None
@@ -124,15 +139,28 @@ class SerbowayApp(QMainWindow):
         self.page4 = uic.loadUi("kiosk_UI/5_choose_cheese.ui")
         self.page5 = uic.loadUi("kiosk_UI/6_confirm_order.ui")
         self.page6 = uic.loadUi("kiosk_UI/7_choose_paymentmethod.ui")
-        self.page7 = uic.loadUi("kiosk_UI/8_order_complete.ui")       
-        self.page8 = uic.loadUi("kiosk_UI/9_pick_up.ui")                # 픽업 페이지 추가
-        self.page9 = uic.loadUi("kiosk_UI/10_request_collect.ui")       # 수거 요청 페이지 추가
-        self.page10 = uic.loadUi("kiosk_UI/11_collect_done.ui")         # 수거 완료 페이지 추가
-        self.page11 = uic.loadUi("kiosk_UI/12_rfid_charge_x.ui")        # rfid 페이지 추가
+        self.page7 = uic.loadUi("kiosk_UI/8_order_complete.ui")
+        self.page8 = uic.loadUi("kiosk_UI/9_pick_up.ui")  # 픽업 페이지 추가
+        self.page9 = uic.loadUi(
+            "kiosk_UI/10_request_collect.ui"
+        )  # 수거 요청 페이지 추가
+        self.page10 = uic.loadUi("kiosk_UI/11_collect_done.ui")  # 수거 완료 페이지 추가
+        self.page11 = uic.loadUi("kiosk_UI/12_rfid_charge_x.ui")  # rfid 페이지 추가
 
-        for page in [self.page0, self.page1, self.page2, self.page3,
-                     self.page4, self.page5, self.page6, self.page7,
-                     self.page8, self.page9, self.page10, self.page11]:
+        for page in [
+            self.page0,
+            self.page1,
+            self.page2,
+            self.page3,
+            self.page4,
+            self.page5,
+            self.page6,
+            self.page7,
+            self.page8,
+            self.page9,
+            self.page10,
+            self.page11,
+        ]:
             self.stack.addWidget(page)
 
         # 버튼 연결 및 동적 매핑 설정
@@ -141,25 +169,33 @@ class SerbowayApp(QMainWindow):
 
     def connect_buttons(self):
         def btn(page, name):
-            button = page.findChild(QPushButton, name, Qt.FindChildrenRecursively)  # 재귀적으로 버튼 찾기
+            button = page.findChild(
+                QPushButton, name, Qt.FindChildrenRecursively
+            )  # 재귀적으로 버튼 찾기
             if not button:  # 버튼을 찾지 못했으면
-                print(f"⚠️ 버튼 누락: {name} 버튼을 찾을 수 없습니다.")  # 경고 메시지 출력
+                print(
+                    f"⚠️ 버튼 누락: {name} 버튼을 찾을 수 없습니다."
+                )  # 경고 메시지 출력
             return button  # 버튼 객체 반환 (없으면 None)
 
         # ========== 첫 페이지: 주문 방식 선택 버튼 수정 ==========
         # UI 파일의 실제 버튼명에 맞춰 수정 필요 (voiceButton → voiceBtn, touchButton → touchBtn)
         voice_btn = btn(self.page0, "voiceBtn")  # 음성 주문 버튼 찾기
         touch_btn = btn(self.page0, "touchBtn")  # 터치 주문 버튼 찾기
-        
+
         if voice_btn:  # 음성 주문 버튼이 존재하면
-            voice_btn.clicked.connect(self.launch_streamlit_voice_order)  # Streamlit 음성 주문 실행 함수와 연결
+            voice_btn.clicked.connect(
+                self.launch_streamlit_voice_order
+            )  # Streamlit 음성 주문 실행 함수와 연결
         if touch_btn:  # 터치 주문 버튼이 존재하면
-            touch_btn.clicked.connect(lambda: self.stack.setCurrentIndex(1))  # 샌드위치 선택 페이지로 이동
+            touch_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(1)
+            )  # 샌드위치 선택 페이지로 이동
 
         # ========== 주문 확인 페이지 버튼들 ==========
-        add_btn = btn(self.page5, "addorderBtn")      # 추가 주문 버튼
-        restart_btn = btn(self.page5, "restartBtn")   # 주문 재시작 버튼
-        pay_btn = btn(self.page5, "payBtn")           # 결제 버튼
+        add_btn = btn(self.page5, "addorderBtn")  # 추가 주문 버튼
+        restart_btn = btn(self.page5, "restartBtn")  # 주문 재시작 버튼
+        pay_btn = btn(self.page5, "payBtn")  # 결제 버튼
 
         if add_btn:  # 추가 주문 버튼이 존재하면
             add_btn.clicked.connect(self.add_order)  # 추가 주문 함수와 연결
@@ -177,23 +213,30 @@ class SerbowayApp(QMainWindow):
         # 8_order_complete.ui - OK 버튼
         ok_btn = btn(self.page7, "okBtn")
         if ok_btn:
-            ok_btn.clicked.connect(lambda: self.stack.setCurrentIndex(8))  # 픽업 페이지로 이동
+            ok_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(8)
+            )  # 픽업 페이지로 이동
 
         # 9_pick_up.ui - Pick Up Done 버튼
         pickup_btn = btn(self.page8, "pickupBtn")
         if pickup_btn:
-            pickup_btn.clicked.connect(lambda: self.stack.setCurrentIndex(9))  # 수거 요청 페이지로 이동
+            pickup_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(9)
+            )  # 수거 요청 페이지로 이동
 
         # 10_request_collect.ui - Request Collect 버튼
         reqcol_btn = btn(self.page9, "reqcolBtn")
         if reqcol_btn:
-            reqcol_btn.clicked.connect(lambda: self.stack.setCurrentIndex(10))  # 수거 완료 페이지로 이동
+            reqcol_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(10)
+            )  # 수거 완료 페이지로 이동
 
         # 11_collect_done.ui - Collect Done 버튼
         coldone_btn = btn(self.page10, "colDone")
         if coldone_btn:
-            coldone_btn.clicked.connect(lambda: self.stack.setCurrentIndex(0))  # 메인 페이지로 돌아가기
-
+            coldone_btn.clicked.connect(
+                lambda: self.stack.setCurrentIndex(0)
+            )  # 메인 페이지로 돌아가기
 
     # [Streamlit 연동 추가] 음성 주문 버튼 클릭 시 Streamlit 서버 실행 및 브라우저 접속
     def launch_streamlit_voice_order(self):
@@ -204,12 +247,16 @@ class SerbowayApp(QMainWindow):
         # Streamlit 서버가 이미 실행 중인지 확인
         if self.streamlit_proc is None or self.streamlit_proc.poll() is not None:
             # Streamlit 서버 실행 (subprocess)
-            self.streamlit_proc = subprocess.Popen([
-                "streamlit", "run", STREAMLIT_SCRIPT,
-                "--server.headless=true",
-                f"--server.port={STREAMLIT_PORT}"
-            ],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            self.streamlit_proc = subprocess.Popen(
+                [
+                    "streamlit",
+                    "run",
+                    STREAMLIT_SCRIPT,
+                    "--server.headless=true",
+                    f"--server.port={STREAMLIT_PORT}",
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
             # 웹브라우저로 Streamlit UI 오픈
             webbrowser.open(f"http://localhost:{STREAMLIT_PORT}")
@@ -218,29 +265,40 @@ class SerbowayApp(QMainWindow):
         # ========== 샌드위치 버튼 매핑 수정 ==========
         sandwich_map = {
             # UI 파일의 실제 버튼 객체명과 일치시킴
-            'BulgogiBtn': ('불고기 샌드위치', 'image/Bulgogi141.png'),  # 절대 경로로 수정
-            'ShrimpBtn': ('새우 샌드위치', 'image/Shrimp141.png'),    # 절대 경로로 수정
-            'BaconBtn': ('베이컨 샌드위치', 'image/Bacon141.png')     # 절대 경로로 수정
+            "BulgogiBtn": (
+                "불고기 샌드위치",
+                "image/Bulgogi141.png",
+            ),  # 절대 경로로 수정
+            "ShrimpBtn": ("새우 샌드위치", "image/Shrimp141.png"),  # 절대 경로로 수정
+            "BaconBtn": ("베이컨 샌드위치", "image/Bacon141.png"),  # 절대 경로로 수정
         }
 
         for obj_name, (menu_key, img_path) in sandwich_map.items():
-            btn = self.page1.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)  # UI에서 버튼 찾기
-            if not btn or menu_key not in self.menu_json.get('menu', {}):  # 버튼이 없거나 메뉴가 JSON에 없으면 스킵
+            btn = self.page1.findChild(
+                QPushButton, obj_name, Qt.FindChildrenRecursively
+            )  # UI에서 버튼 찾기
+            if not btn or menu_key not in self.menu_json.get(
+                "menu", {}
+            ):  # 버튼이 없거나 메뉴가 JSON에 없으면 스킵
                 continue
 
             # 배경 이미지 제거 + 텍스트 정렬 (UI 파일의 배경 이미지를 제거하고 아이콘으로 대체)
-            btn.setStyleSheet("""
+            btn.setStyleSheet(
+                """
                 QPushButton {
                     background-image: none;  /* UI 파일의 기존 배경 이미지 제거 */
                     text-align: center;      /* 텍스트 중앙 정렬 */
                 }
-            """)
+            """
+            )
 
             # 아이콘 설정 (이미지 파일 존재 여부 확인 후 설정)
             if os.path.exists(img_path):  # 이미지 파일이 존재하면
                 btn.setIcon(QIcon(img_path))  # 해당 이미지를 아이콘으로 설정
             else:  # 이미지 파일이 없으면
-                btn.setIcon(QIcon(self.menu_json['menu'][menu_key].get('image', img_path)))  # JSON에서 이미지 경로 가져오기
+                btn.setIcon(
+                    QIcon(self.menu_json["menu"][menu_key].get("image", img_path))
+                )  # JSON에서 이미지 경로 가져오기
             btn.setIconSize(QSize(128, 128))  # 아이콘 크기를 128x128로 설정
 
             # 클릭 이벤트 연결 (기존 연결 해제 후 새로 연결)
@@ -248,55 +306,92 @@ class SerbowayApp(QMainWindow):
                 btn.clicked.disconnect()  # 기존에 연결된 시그널 해제
             except TypeError:  # 연결된 시그널이 없으면 TypeError 발생하므로 무시
                 pass
-            btn.clicked.connect(lambda _, m=menu_key: self.select_sandwich(m))  # 샌드위치 선택 함수와 연결
+            btn.clicked.connect(
+                lambda _, m=menu_key: self.select_sandwich(m)
+            )  # 샌드위치 선택 함수와 연결
 
         # ========== 소스 버튼 매핑 수정 (Btn 접미사 추가) ==========
-        sauce_map = {'ItalianBtn': '이탈리안', 'ChillyBtn': '칠리'}  # UI 파일의 실제 객체명에 맞춤
+        sauce_map = {
+            "ItalianBtn": "이탈리안",
+            "ChillyBtn": "칠리",
+        }  # UI 파일의 실제 객체명에 맞춤
         for obj_name, sauce_key in sauce_map.items():
-            btn = self.page2.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)  # 소스 페이지에서 버튼 찾기
-            if not btn or sauce_key not in self.menu_json.get('sauce', {}):  # 버튼이 없거나 소스가 JSON에 없으면 스킵
+            btn = self.page2.findChild(
+                QPushButton, obj_name, Qt.FindChildrenRecursively
+            )  # 소스 페이지에서 버튼 찾기
+            if not btn or sauce_key not in self.menu_json.get(
+                "sauce", {}
+            ):  # 버튼이 없거나 소스가 JSON에 없으면 스킵
                 continue
-            price = self.menu_json['sauce'][sauce_key]['price']  # JSON에서 소스 가격 가져오기
-            btn.setText(f"{sauce_key}\n(+{price}원)")  # 버튼 텍스트를 "소스명\n(+가격원)" 형태로 설정
+            price = self.menu_json["sauce"][sauce_key][
+                "price"
+            ]  # JSON에서 소스 가격 가져오기
+            btn.setText(
+                f"{sauce_key}\n(+{price}원)"
+            )  # 버튼 텍스트를 "소스명\n(+가격원)" 형태로 설정
             try:
                 btn.clicked.disconnect()  # 기존 연결 해제
             except TypeError:
                 pass
-            btn.clicked.connect(lambda _, s=sauce_key: self.select_sauce(s))  # 소스 선택 함수와 연결
+            btn.clicked.connect(
+                lambda _, s=sauce_key: self.select_sauce(s)
+            )  # 소스 선택 함수와 연결
 
         # ========== 야채 버튼 매핑 수정 (Btn 접미사 추가) ==========
-        veg_map = {'LettuceBtn': '양상추', 'RomaineBtn': '로메인', 'BazilBtn': '바질'}  # UI 파일의 실제 객체명에 맞춤
+        veg_map = {
+            "LettuceBtn": "양상추",
+            "RomaineBtn": "로메인",
+            "BazilBtn": "바질",
+        }  # UI 파일의 실제 객체명에 맞춤
         for obj_name, veg_key in veg_map.items():
-            btn = self.page3.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)  # 야채 페이지에서 버튼 찾기
-            if btn and veg_key in self.menu_json.get('vegetable', {}):  # 버튼이 있고 야채가 JSON에 있으면
-                price = self.menu_json['vegetable'][veg_key].get('price', 0)  # JSON에서 야채 가격 가져오기 (없으면 0)
+            btn = self.page3.findChild(
+                QPushButton, obj_name, Qt.FindChildrenRecursively
+            )  # 야채 페이지에서 버튼 찾기
+            if btn and veg_key in self.menu_json.get(
+                "vegetable", {}
+            ):  # 버튼이 있고 야채가 JSON에 있으면
+                price = self.menu_json["vegetable"][veg_key].get(
+                    "price", 0
+                )  # JSON에서 야채 가격 가져오기 (없으면 0)
                 btn.setText(f"{veg_key}\n(+{price}원)")  # 버튼 텍스트 설정
                 try:
                     btn.clicked.disconnect()  # 기존 연결 해제
                 except TypeError:
                     pass
-                btn.clicked.connect(lambda _, v=veg_key: self.select_vegetable(v))  # 야채 선택 함수와 연결
+                btn.clicked.connect(
+                    lambda _, v=veg_key: self.select_vegetable(v)
+                )  # 야채 선택 함수와 연결
 
         # ========== 치즈 버튼 매핑 수정 (Btn 접미사 추가) ==========
         cheese_map = {
-            'SliceBtn': '슬라이스 치즈',      # UI 파일의 실제 객체명에 맞춤
-            'ShredBtn': '슈레드 치즈',       # UI 파일의 실제 객체명에 맞춤
-            'MozzarellaBtn': '모짜렐라 치즈'  # UI 파일의 실제 객체명에 맞춤
+            "SliceBtn": "슬라이스 치즈",  # UI 파일의 실제 객체명에 맞춤
+            "ShredBtn": "슈레드 치즈",  # UI 파일의 실제 객체명에 맞춤
+            "MozzarellaBtn": "모짜렐라 치즈",  # UI 파일의 실제 객체명에 맞춤
         }
         for obj_name, cheese_key in cheese_map.items():
-            btn = self.page4.findChild(QPushButton, obj_name, Qt.FindChildrenRecursively)  # 치즈 페이지에서 버튼 찾기
-            if btn and cheese_key in self.menu_json.get('cheese', {}):  # 버튼이 있고 치즈가 JSON에 있으면
-                price = self.menu_json['cheese'][cheese_key].get('price', 0)  # JSON에서 치즈 가격 가져오기 (없으면 0)
+            btn = self.page4.findChild(
+                QPushButton, obj_name, Qt.FindChildrenRecursively
+            )  # 치즈 페이지에서 버튼 찾기
+            if btn and cheese_key in self.menu_json.get(
+                "cheese", {}
+            ):  # 버튼이 있고 치즈가 JSON에 있으면
+                price = self.menu_json["cheese"][cheese_key].get(
+                    "price", 0
+                )  # JSON에서 치즈 가격 가져오기 (없으면 0)
                 btn.setText(f"{cheese_key}\n(+{price}원)")  # 버튼 텍스트 설정
                 try:
                     btn.clicked.disconnect()  # 기존 연결 해제
                 except TypeError:
                     pass
-                btn.clicked.connect(lambda _, c=cheese_key: self.select_cheese(c))  # 치즈 선택 함수와 연결
+                btn.clicked.connect(
+                    lambda _, c=cheese_key: self.select_cheese(c)
+                )  # 치즈 선택 함수와 연결
 
         # ========== 주문 리스트 위젯 참조 수정 ==========
         # QTextEdit에서 QListWidget으로 변경 (pyqt 파일과 동일하게)
-        self.order_list_widget = self.page5.findChild(QTextEdit, "orderList", Qt.FindChildrenRecursively)
+        self.order_list_widget = self.page5.findChild(
+            QTextEdit, "orderList", Qt.FindChildrenRecursively
+        )
 
     def select_sandwich(self, name):
         self.current_sandwich = name
@@ -318,54 +413,63 @@ class SerbowayApp(QMainWindow):
 
     # 사용자가 샌드위치, 소스, 야채, 치즈를 선택한 뒤 해당 선택을 목록에 추가
     def save_order_item(self):
-        base_price = self.menu_json['menu'][self.current_sandwich]['price']
+        base_price = self.menu_json["menu"][self.current_sandwich]["price"]
         opt_price = (
-            self.menu_json['sauce'][self.selected_sauce].get('price', 0) +
-            self.menu_json['vegetable'][self.selected_vegetable].get('price', 0) +
-            self.menu_json['cheese'][self.selected_cheese].get('price', 0)
+            self.menu_json["sauce"][self.selected_sauce].get("price", 0)
+            + self.menu_json["vegetable"][self.selected_vegetable].get("price", 0)
+            + self.menu_json["cheese"][self.selected_cheese].get("price", 0)
         )
         unit_price = base_price + opt_price
-        self.order_data['menu'].append({
-            'name': self.current_sandwich,
-            'price': unit_price,
-            'qty': 1,
-            'sauce': self.selected_sauce,
-            'vegetable': self.selected_vegetable,
-            'cheese': self.selected_cheese
-        })
+        self.order_data["menu"].append(
+            {
+                "name": self.current_sandwich,
+                "price": unit_price,
+                "qty": 1,
+                "sauce": self.selected_sauce,
+                "vegetable": self.selected_vegetable,
+                "cheese": self.selected_cheese,
+            }
+        )
         self.send_order_data = {
             "table_number": TABLE_NUM,
             "sandwich": self.current_sandwich,
             "sauce": self.selected_sauce,
             "vegetable": self.selected_vegetable,
             "cheese": self.selected_cheese,
-            "price": unit_price
+            "price": unit_price,
         }
+
     # 주문 내역을 UI에 표시 하고 총 금액을 계산해서 보여준다.
     def update_order_list(self):
         """주문 내역을 UI에 표시하고 총 금액을 계산해서 보여주는 함수"""
         # QListWidget 방식 (pyqt 파일과 동일)
-        if hasattr(self, 'order_list_widget') and self.order_list_widget:  # order_list_widget이 존재하면
+        if (
+            hasattr(self, "order_list_widget") and self.order_list_widget
+        ):  # order_list_widget이 존재하면
             self.order_list_widget.clear()  # 기존 목록 지우기
             total = 0  # 총 금액 초기화
-            
-            for item in self.order_data['menu']:  # 주문 데이터의 각 메뉴 아이템에 대해
+
+            for item in self.order_data["menu"]:  # 주문 데이터의 각 메뉴 아이템에 대해
                 # 주문 아이템 텍스트 생성 (메뉴명, 옵션들, 수량, 가격)
                 text = (
                     f"{item['name']} ({item['sauce']}/{item['vegetable']}/{item['cheese']}) "
                     f"x{item['qty']} - {item['price']}원"
                 )
-                self.order_list_widget.addItem(text)  # 리스트 위젯에 아이템 추가
-                total += item['price'] * item['qty']  # 총 금액에 (가격 × 수량) 추가
+                # self.order_list_widget.addItem(text)  # 리스트 위젯에 아이템 추가
+                # QTextEdit에는 addItem()이 없으므로 setPlainText 또는 append 사용
+                self.order_list_widget.append(text)
+                total += item["price"] * item["qty"]  # 총 금액에 (가격 × 수량) 추가
 
             # 총 합계 라벨 찾아서 업데이트
-            lbl = self.page5.findChild(QLabel, "summaryLabel", Qt.FindChildrenRecursively)  # 총합계 라벨 찾기
+            lbl = self.page5.findChild(
+                QLabel, "summaryLabel", Qt.FindChildrenRecursively
+            )  # 총합계 라벨 찾기
             if lbl:  # 라벨이 존재하면
                 lbl.setText(f"총 합계: {total}원")  # 총 합계 텍스트 설정
 
     # 결제 화면으로 이동
     def go_to_payment(self):
-        if not self.order_data['menu']:
+        if not self.order_data["menu"]:
             QMessageBox.warning(self, "경고", "주문 내역이 없습니다.")
             return
         self.stack.setCurrentIndex(6)
@@ -376,32 +480,31 @@ class SerbowayApp(QMainWindow):
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         # 주문 데이터에 타임스탬프 추가
         order_with_time = self.order_data.copy()
-        order_with_time['timestamp'] = timestamp
+        order_with_time["timestamp"] = timestamp
         # JSON 파일로 저장
         order_filename = f"order_{timestamp}.json"
-        with open(order_filename, 'w', encoding='utf-8') as f:
+        with open(order_filename, "w", encoding="utf-8") as f:
             json.dump(order_with_time, f, ensure_ascii=False, indent=4)
         print(f"주문 내역이 {order_filename}에 저장되었습니다.")
         result = send_order_to_server(self.send_order_data)
-        if result.get('status') == 'fail':
+        if result.get("status") == "fail":
             QMessageBox.warning(self, "서버 오류", "주문 저장 중 오류가 발생했습니다.")
         self.stack.setCurrentIndex(7)
 
     def restart_order(self):
-        self.order_data = {'menu': []}
+        self.order_data = {"menu": []}
         self.stack.setCurrentIndex(1)
 
     def add_order(self):
         """추가 주문을 위해 샌드위치 선택 페이지로 이동하는 함수"""
         # 현재 선택사항 초기화 (새로운 주문을 위해)
-        self.current_sandwich = None     # 선택된 샌드위치 초기화
-        self.selected_sauce = None       # 선택된 소스 초기화
-        self.selected_vegetable = None   # 선택된 야채 초기화
-        self.selected_cheese = None      # 선택된 치즈 초기화
-        
-        # 샌드위치 선택 페이지(page1)로 이동
-        self.stack.setCurrentIndex(1)   # 스택 위젯의 인덱스 1번 페이지로 이동
+        self.current_sandwich = None  # 선택된 샌드위치 초기화
+        self.selected_sauce = None  # 선택된 소스 초기화
+        self.selected_vegetable = None  # 선택된 야채 초기화
+        self.selected_cheese = None  # 선택된 치즈 초기화
 
+        # 샌드위치 선택 페이지(page1)로 이동
+        self.stack.setCurrentIndex(1)  # 스택 위젯의 인덱스 1번 페이지로 이동
 
     def show_webview(self):
         self.stack.addWidget(self.webview)
@@ -409,7 +512,7 @@ class SerbowayApp(QMainWindow):
 
     def handle_payment_result(self, result):
         """결제 결과 처리"""
-        if result.get('status') == 'paid':
+        if result.get("status") == "paid":
             self.save_order()
             self.show_confirmation()
 
@@ -419,10 +522,10 @@ class SerbowayApp(QMainWindow):
             order_data = {
                 "orders": self.server.current_order,
                 "timestamp": datetime.now().isoformat(),
-                "receipt": ''.join(random.choices(string.digits, k=8))
+                "receipt": "".join(random.choices(string.digits, k=8)),
             }
             filename = f"order_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            with open(filename, 'w', encoding='utf-8') as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 json.dump(order_data, f, ensure_ascii=False, indent=2)
             print(f"주문 데이터 로컬 저장 완료: {filename}")
         except Exception as e:
@@ -430,7 +533,9 @@ class SerbowayApp(QMainWindow):
 
     def show_confirmation(self):
         """확인 페이지 표시"""
-        QMessageBox.information(self, "주문 완료", "음성 주문이 정상적으로 처리되었습니다!")
+        QMessageBox.information(
+            self, "주문 완료", "음성 주문이 정상적으로 처리되었습니다!"
+        )
 
     def closeEvent(self, event):
         """창 종료 시 리소스 정리"""
@@ -448,7 +553,8 @@ class SerbowayApp(QMainWindow):
     def run_tcp_server(self):
         # while true:
         #     print("Server!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        KIOSK_HOST = "192.168.0.159"
+        # KIOSK_HOST = "192.168.0.55"
+        KIOSK_HOST = "192.168.55.177"
         # KIOSK_PORT = 650
         KIOSK_PORT = 5050
 
@@ -477,29 +583,32 @@ class SerbowayApp(QMainWindow):
         if self.voice_order_data:
             order = self.voice_order_data
             print(2)
-            self.order_data = {'menu': []}
+            self.order_data = {"menu": []}
             for item in order.get("menu", []):
-                self.order_data['menu'].append({
-                    'name': item.get("name"),
-                    'price': item.get("price"),
-                    'qty': item.get("qty", 1),
-                    'sauce': item.get("sauce"),
-                    'vegetable': item.get("vegetable"),
-                    'cheese': item.get("cheese")
-                })
+                self.order_data["menu"].append(
+                    {
+                        "name": item.get("name"),
+                        "price": item.get("price"),
+                        "qty": item.get("qty", 1),
+                        "sauce": item.get("sauce"),
+                        "vegetable": item.get("vegetable"),
+                        "cheese": item.get("cheese"),
+                    }
+                )
             self.update_order_list()
             self.stack.setCurrentIndex(6)
-            QMessageBox.information(self, "음성 주문", "음성 주문이 도착했습니다. 결제를 진행해주세요.")
-
+            QMessageBox.information(
+                self, "음성 주문", "음성 주문이 도착했습니다. 결제를 진행해주세요."
+            )
 
     def complete_order(self):
         # 결제 완료 시
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         order_with_time = self.order_data.copy()
-        order_with_time['timestamp'] = timestamp
+        order_with_time["timestamp"] = timestamp
         # 여기서만 JSON 파일 저장
         order_filename = f"order_{timestamp}.json"
-        with open(order_filename, 'w', encoding='utf-8') as f:
+        with open(order_filename, "w", encoding="utf-8") as f:
             json.dump(order_with_time, f, ensure_ascii=False, indent=4)
         # 그리고 서버로 POST
         result = send_order_to_server(order_with_time)
@@ -512,10 +621,11 @@ class SerbowayApp(QMainWindow):
         return super().event(event)
 
 
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = SerbowayApp()
     window.show()
     sys.exit(app.exec_())
-    QLoggingCategory.setFilterRules("*.debug=false\n*.info=false\n*.warning=false\n*.critical=true")    # 내부 디버그 메세지 숨김
+    QLoggingCategory.setFilterRules(
+        "*.debug=false\n*.info=false\n*.warning=false\n*.critical=true"
+    )  # 내부 디버그 메세지 숨김
