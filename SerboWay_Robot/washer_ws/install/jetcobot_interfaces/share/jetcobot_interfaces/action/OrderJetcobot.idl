@@ -1,0 +1,24 @@
+// generated from rosidl_adapter/resource/action.idl.em
+// with input from jetcobot_interfaces/action/OrderJetcobot.action
+// generated code does not contain a copyright notice
+
+
+module jetcobot_interfaces {
+  module action {
+    @verbatim (language="comment", text=
+      "Goal 정의 (요청할 데이터)")
+    struct OrderJetcobot_Goal {
+      string order;
+    };
+    @verbatim (language="comment", text=
+      "Result 정의 (서버에서 반환할 데이터)")
+    struct OrderJetcobot_Result {
+      string status;
+    };
+    @verbatim (language="comment", text=
+      "Feedback 정의 (옵션, 서버 진행 상태 등의 데이터)")
+    struct OrderJetcobot_Feedback {
+      int32 progress;
+    };
+  };
+};

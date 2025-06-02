@@ -1,0 +1,522 @@
+{
+  "type_description_msg": {
+    "type_description": {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot",
+      "fields": [
+        {
+          "name": "goal",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Goal"
+          },
+          "default_value": ""
+        },
+        {
+          "name": "result",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Result"
+          },
+          "default_value": ""
+        },
+        {
+          "name": "feedback",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Feedback"
+          },
+          "default_value": ""
+        },
+        {
+          "name": "send_goal_service",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal"
+          },
+          "default_value": ""
+        },
+        {
+          "name": "get_result_service",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult"
+          },
+          "default_value": ""
+        },
+        {
+          "name": "feedback_message",
+          "type": {
+            "type_id": 1,
+            "capacity": 0,
+            "string_capacity": 0,
+            "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_FeedbackMessage"
+          },
+          "default_value": ""
+        }
+      ]
+    },
+    "referenced_type_descriptions": [
+      {
+        "type_name": "builtin_interfaces/msg/Time",
+        "fields": [
+          {
+            "name": "sec",
+            "type": {
+              "type_id": 6,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "nanosec",
+            "type": {
+              "type_id": 7,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_Feedback",
+        "fields": [
+          {
+            "name": "progress",
+            "type": {
+              "type_id": 6,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_FeedbackMessage",
+        "fields": [
+          {
+            "name": "goal_id",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "unique_identifier_msgs/msg/UUID"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "feedback",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Feedback"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult",
+        "fields": [
+          {
+            "name": "request_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Request"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "response_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Response"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "event_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Event"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Event",
+        "fields": [
+          {
+            "name": "info",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "service_msgs/msg/ServiceEventInfo"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "request",
+            "type": {
+              "type_id": 97,
+              "capacity": 1,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Request"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "response",
+            "type": {
+              "type_id": 97,
+              "capacity": 1,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Response"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Request",
+        "fields": [
+          {
+            "name": "goal_id",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "unique_identifier_msgs/msg/UUID"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Response",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "type_id": 2,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "result",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Result"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_Goal",
+        "fields": [
+          {
+            "name": "order",
+            "type": {
+              "type_id": 17,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_Result",
+        "fields": [
+          {
+            "name": "status",
+            "type": {
+              "type_id": 17,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal",
+        "fields": [
+          {
+            "name": "request_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Request"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "response_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Response"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "event_message",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Event"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Event",
+        "fields": [
+          {
+            "name": "info",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "service_msgs/msg/ServiceEventInfo"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "request",
+            "type": {
+              "type_id": 97,
+              "capacity": 1,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Request"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "response",
+            "type": {
+              "type_id": 97,
+              "capacity": 1,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Response"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Request",
+        "fields": [
+          {
+            "name": "goal_id",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "unique_identifier_msgs/msg/UUID"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "goal",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "jetcobot_interfaces/action/OrderJetcobot_Goal"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Response",
+        "fields": [
+          {
+            "name": "accepted",
+            "type": {
+              "type_id": 15,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "stamp",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "builtin_interfaces/msg/Time"
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "service_msgs/msg/ServiceEventInfo",
+        "fields": [
+          {
+            "name": "event_type",
+            "type": {
+              "type_id": 3,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "stamp",
+            "type": {
+              "type_id": 1,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": "builtin_interfaces/msg/Time"
+            },
+            "default_value": ""
+          },
+          {
+            "name": "client_gid",
+            "type": {
+              "type_id": 51,
+              "capacity": 16,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          },
+          {
+            "name": "sequence_number",
+            "type": {
+              "type_id": 8,
+              "capacity": 0,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      },
+      {
+        "type_name": "unique_identifier_msgs/msg/UUID",
+        "fields": [
+          {
+            "name": "uuid",
+            "type": {
+              "type_id": 51,
+              "capacity": 16,
+              "string_capacity": 0,
+              "nested_type_name": ""
+            },
+            "default_value": ""
+          }
+        ]
+      }
+    ]
+  },
+  "type_hashes": [
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot",
+      "hash_string": "RIHS01_3c106c60700ed43c36eba4eea46bc19c7282f1560258938364d169f5441f6394"
+    },
+    {
+      "type_name": "builtin_interfaces/msg/Time",
+      "hash_string": "RIHS01_b106235e25a4c5ed35098aa0a61a3ee9c9b18d197f398b0e4206cea9acf9c197"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_Feedback",
+      "hash_string": "RIHS01_38be9dc65dab2feb0dcc57dba4b9b7e25fc5b636a964ee24952319655e964c96"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_FeedbackMessage",
+      "hash_string": "RIHS01_89413779fe2ec15e76d1ca342fd5f6a460bfed07c55cf3b640c18d8e4ec9b795"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult",
+      "hash_string": "RIHS01_d35dad6d2a704ceaca3d39aba0b90b74361d64aeb1a931461f112bc4eae590b1"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Event",
+      "hash_string": "RIHS01_44d3a4223caa33377513c04180d45b9ce53613b894be3e54c74126fb43ec2be2"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Request",
+      "hash_string": "RIHS01_712d4337db60f1689051ec2e394e0f21002750cd46a30d38241582c0a9f34e77"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_GetResult_Response",
+      "hash_string": "RIHS01_011b7c82dde6574f498bca487ad5a331a858e93e138d525a3d07cdeea1046119"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_Goal",
+      "hash_string": "RIHS01_0c67304bd29083b1ab958958f9ef982180d0534ba6e90acba9e524756dfbf3a1"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_Result",
+      "hash_string": "RIHS01_cfb88409badf1fd53d5f7fa4ddb2ad6070475a53bd35ecfc5deb3710336db289"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal",
+      "hash_string": "RIHS01_2451b9abf017e6adc7dc655b4534cb0be6cd3a86feb1927f6096847daf76199b"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Event",
+      "hash_string": "RIHS01_6ac453e02e91ee2b70ac3bfb7335b372aa5bdb0e223f9b73450df2e27460ffa2"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Request",
+      "hash_string": "RIHS01_1666de3a3aaba8aea8821a5d7c342ad25171d946d28475e773746f11f6d7713e"
+    },
+    {
+      "type_name": "jetcobot_interfaces/action/OrderJetcobot_SendGoal_Response",
+      "hash_string": "RIHS01_d505825522f85b1aa17dcfcfe37b9b648a95f95b73acca2c5054bd57be131859"
+    },
+    {
+      "type_name": "service_msgs/msg/ServiceEventInfo",
+      "hash_string": "RIHS01_41bcbbe07a75c9b52bc96bfd5c24d7f0fc0a08c0cb7921b3373c5732345a6f45"
+    },
+    {
+      "type_name": "unique_identifier_msgs/msg/UUID",
+      "hash_string": "RIHS01_1b8e8aca958cbea28fe6ef60bf6c19b683c97a9ef60bb34752067d0f2f7ab437"
+    }
+  ]
+}

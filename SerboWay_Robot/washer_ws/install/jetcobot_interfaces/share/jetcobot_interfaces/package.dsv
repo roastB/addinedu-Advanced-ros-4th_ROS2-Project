@@ -1,0 +1,14 @@
+source;share/jetcobot_interfaces/hook/cmake_prefix_path.ps1
+source;share/jetcobot_interfaces/hook/cmake_prefix_path.dsv
+source;share/jetcobot_interfaces/hook/cmake_prefix_path.sh
+source;share/jetcobot_interfaces/hook/ld_library_path_lib.ps1
+source;share/jetcobot_interfaces/hook/ld_library_path_lib.dsv
+source;share/jetcobot_interfaces/hook/ld_library_path_lib.sh
+source;share/jetcobot_interfaces/hook/pythonpath.ps1
+source;share/jetcobot_interfaces/hook/pythonpath.dsv
+source;share/jetcobot_interfaces/hook/pythonpath.sh
+source;share/jetcobot_interfaces/local_setup.bash
+source;share/jetcobot_interfaces/local_setup.dsv
+source;share/jetcobot_interfaces/local_setup.ps1
+source;share/jetcobot_interfaces/local_setup.sh
+source;share/jetcobot_interfaces/local_setup.zsh

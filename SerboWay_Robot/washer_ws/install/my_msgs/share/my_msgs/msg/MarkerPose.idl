@@ -1,0 +1,15 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from my_msgs/msg/MarkerPose.msg
+// generated code does not contain a copyright notice
+
+
+module my_msgs {
+  module msg {
+    typedef double double__6[6];
+    struct MarkerPose {
+      int32 id;
+
+      double__6 pose_of_6d;
+    };
+  };
+};

@@ -14,17 +14,22 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='addineud',
+    maintainer='addinedu',
     maintainer_email='iceative12@gmail.com',
     description='TODO: Package description',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'order_saver = serboway_system.order_saver:main',
             'order_save = serboway_system.order_save:main',
             #'order_http = serboway_system.order_http:main',
             'order_process = serboway_system.order_process:main',
+<<<<<<< Updated upstream
             'task_allocator = serboway_system.pinky_task_allocation.simplified_pinky_allocator:main',
+=======
+            'order_return = serboway_system.order_return:main',
+>>>>>>> Stashed changes
         ],
     },
 )
