@@ -1,1 +1,0 @@
-# SerboWay Safe Waiter

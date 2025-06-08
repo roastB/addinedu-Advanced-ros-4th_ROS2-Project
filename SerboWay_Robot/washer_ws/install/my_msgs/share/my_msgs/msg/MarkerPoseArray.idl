@@ -1,0 +1,13 @@
+// generated from rosidl_adapter/resource/msg.idl.em
+// with input from my_msgs/msg/MarkerPoseArray.msg
+// generated code does not contain a copyright notice
+
+#include "my_msgs/msg/MarkerPose.idl"
+
+module my_msgs {
+  module msg {
+    struct MarkerPoseArray {
+      sequence<my_msgs::msg::MarkerPose> markers;
+    };
+  };
+};

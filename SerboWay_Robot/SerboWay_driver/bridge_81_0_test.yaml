@@ -1,0 +1,10 @@
+# ~/ros_bridge_config/bridge_81_0_test.yaml
+name: bridge_81_0_test
+
+from_domain: 81
+to_domain:   78
+
+topics:
+  /test_topic:
+    type: std_msgs/msg/String
+    bidirectional: false

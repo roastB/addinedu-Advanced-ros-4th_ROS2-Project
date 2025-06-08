@@ -1,0 +1,46 @@
+# Core Dependencies
+beautifulsoup4==4.12.3
+python-dotenv==1.0.1
+pymysql==1.1.0
+PyYAML==6.0.1
+requests==2.31.0
+
+# Machine Learning & Data Processing
+numpy==1.26.4
+scipy==1.11.4
+matplotlib==3.6.3
+opencv-python==4.11.0.86
+pillow==10.2.0
+
+# Web & GUI
+Flask==3.1.0
+Jinja2==3.1.2
+PyQt5==5.15.9
+PyQtWebEngine==5.15.6
+streamlit==1.35.0
+
+# Testing & Tools
+pytest==7.4.4
+
+# LangChain & AI
+langchain==0.3.23
+langchain-community==0.3.21
+langchain-core==0.3.51
+langchain-openai==0.3.12
+langchain-text-splitters==0.3.8
+langgraph==0.3.28
+langsmith==0.3.30
+openai==1.30.1
+
+# Audio Processing
+sounddevice==0.4.6
+soundfile==0.12.1
+gTTS==2.5.0
+openai-whisper==20231117
+
+# Deep Learning
+torch==2.3.1+cu121 --extra-index-url https://download.pytorch.org/whl/cu121
+
+# System Dependencies (참고용)
+# FFmpeg: sudo apt install ffmpeg (Linux) / brew install ffmpeg (Mac)
+# CUDA 12.1: https://developer.nvidia.com/cuda-12-1-0-download-archive

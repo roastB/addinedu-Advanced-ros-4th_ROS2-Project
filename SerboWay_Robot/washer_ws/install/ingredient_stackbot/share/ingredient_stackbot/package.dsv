@@ -1,0 +1,6 @@
+source;share/ingredient_stackbot/hook/pythonpath.ps1
+source;share/ingredient_stackbot/hook/pythonpath.dsv
+source;share/ingredient_stackbot/hook/pythonpath.sh
+source;share/ingredient_stackbot/hook/ament_prefix_path.ps1
+source;share/ingredient_stackbot/hook/ament_prefix_path.dsv
+source;share/ingredient_stackbot/hook/ament_prefix_path.sh
