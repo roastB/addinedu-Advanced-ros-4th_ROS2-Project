@@ -51,22 +51,22 @@
 ## 4-2. 자동화 제조 및 배송 프로세스
 
 ### 4-2-1. Pinky 로봇 제조 위치 이동
-![4-2.핑키 제조 위치로 이동](https://github.com/user-attachments/assets/7f8c0d88-2cae-42fe-aa30-aedb2b7f86c3)
+![4-2-1.핑키 제조 위치로 이동](https://github.com/user-attachments/assets/7f8c0d88-2cae-42fe-aa30-aedb2b7f86c3)
 
 ### 4-2-2. Jetcobot 샌드위치 제조 시작
-*[샌드위치 제조 GIF 또는 설명 추가 예정]*
+![4-2-2.샌드위치 제조 시작](https://github.com/user-attachments/assets/88f5350a-f8c8-4cc0-bf9f-4d003865b8a0)
 
 ### 4-2-3. Main Control Server 제조 진행 상태 모니터링
 ![05_terminal_making_in_progress](https://github.com/user-attachments/assets/fb3af0a9-f832-435b-a3cd-f3bef28de05f)
 
 ### 4-2-4. Jetcobot 샌드위치를 Pinky 적재함으로 푸시
-*[샌드위치 밀기 GIF 또는 설명 추가 예정]*
+![4-2-4. 샌드위치 적재함으로 푸시](https://github.com/user-attachments/assets/45463ee2-482f-4d4c-9ea9-9f44c9c65cce)
 
 ### 4-2-5. Main Control Server Pinky 적재함으로 푸시 명령
 ![06_terminal_ready_to_deliver_push_command](https://github.com/user-attachments/assets/26d47864-6e7c-4c1c-b7d0-e82f3f614f70)
 
 ### 4-2-6. Pinky 로봇 서빙 위치로 배송
-*[샌드위치 서빙 GIF 또는 설명 추가 예정]*
+![4-2-6.핑키 서빙](https://github.com/user-attachments/assets/da29d63a-117e-4179-83c5-8f9eb9596a6d)
 
 ### 4-2-7. Main Control Server 배송 준비 완료시 서빙 명령 및 배송 완료 처리
 ![07_terminal_push_complete_and_delivery_command](https://github.com/user-attachments/assets/d53b8402-750c-41ff-8f10-37277551c7c7)
